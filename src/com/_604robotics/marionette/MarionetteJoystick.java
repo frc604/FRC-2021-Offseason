@@ -2,6 +2,7 @@ package com._604robotics.marionette;
 
 import edu.wpi.first.wpilibj.Joystick;
 
+@Deprecated
 public class MarionetteJoystick extends Joystick {
   private final InputPlayer player;
   private final int index;

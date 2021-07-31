@@ -1,5 +1,6 @@
 package com._604robotics.marionette;
 
+@Deprecated
 public class InputPlayer {
   private InputRecording playbackRecording;
   private double playbackTimestamp;

@@ -1,5 +1,6 @@
 package com._604robotics.marionette;
 
+@Deprecated
 public class JoystickDescriptor {
   private final int axisCount;
   private final int buttonCount;

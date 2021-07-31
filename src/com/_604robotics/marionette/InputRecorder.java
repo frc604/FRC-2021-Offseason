@@ -4,6 +4,7 @@ import edu.wpi.first.wpilibj.GenericHID;
 import java.io.Closeable;
 import java.io.IOException;
 
+@Deprecated
 public class InputRecorder implements Closeable {
   @SuppressWarnings("unused")
   private final GenericHID[] sources;

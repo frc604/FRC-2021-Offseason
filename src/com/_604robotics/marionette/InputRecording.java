@@ -2,6 +2,7 @@ package com._604robotics.marionette;
 
 import java.io.*;
 
+@Deprecated
 public class InputRecording {
   private int frameCount;
   private final JoystickDescriptor[] joystickDescriptors;
