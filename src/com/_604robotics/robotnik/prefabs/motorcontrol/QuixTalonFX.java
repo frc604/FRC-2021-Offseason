@@ -10,12 +10,9 @@ public class QuixTalonFX extends MotorController {
 
   private String name;
 
-  private Motor motor;
-
   public QuixTalonFX(int port, String name, Motor motor, Module module) {
-    super(module);
-    this.motor = motor;
-
+    super(motor, module);
+    
     this.controller = new WPI_TalonFX(port);
 
     controller.configFactoryDefault();

@@ -11,12 +11,9 @@ public class QuixSparkMAX extends MotorController {
 
   private String name;
 
-  private Motor motor;
-
   public QuixSparkMAX(int port, String name, Motor motor, Module module) {
-    super(module);
-    this.motor = motor;
-    if (this.motor == Motor.kNEO || this.motor == Motor.kNEO550) {
+    super(motor, module);
+    if (super.motor == Motor.kNEO || super.motor == Motor.kNEO550) {
       controller = new CANSparkMax(port, MotorType.kBrushless);
     } else {
       controller = new CANSparkMax(port, MotorType.kBrushed);
