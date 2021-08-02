@@ -10,6 +10,9 @@ public class QuixTalonFX extends MotorController {
 
   private String name;
 
+  private double peakCurrentLimit = 40;
+  private double peakCurrentDuration = 0.1;
+
   public QuixTalonFX(int port, String name, Motor motor, Module module) {
     super(motor, module);
     
@@ -43,7 +46,7 @@ public class QuixTalonFX extends MotorController {
     super.isLimiting = enable;
 
     controller.configSupplyCurrentLimit(
-        new SupplyCurrentLimitConfiguration(enable, getCurrentLimit(), 15, 0.5));
+        new SupplyCurrentLimitConfiguration(enable, getCurrentLimit(), this.peakCurrentLimit, this.peakCurrentDuration));
   }
 
   public void setVoltageCompSaturation(double volts, boolean enable) {
@@ -93,5 +96,21 @@ public class QuixTalonFX extends MotorController {
   @Override
   public double getInputVoltage() {
     return controller.getBusVoltage();
+  }
+
+  public void setPeakCurrentLimit(double limit) {
+    this.peakCurrentLimit = limit;
+  }
+
+  public double getPeakCurrentLimit() {
+    return this.peakCurrentLimit;
+  }
+
+  public void setPeakCurrentDuration(double duration) {
+    this.peakCurrentDuration = duration;
+  }
+
+  public double getPeakCurrentDuration() {
+    return this.peakCurrentDuration;
   }
 }
