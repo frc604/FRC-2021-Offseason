@@ -5,7 +5,7 @@ import com._604robotics.robotnik.prefabs.motorcontrol.gearing.CalculableRatio;
 import com.revrobotics.CANEncoder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
-public class NEOEncoder implements Encoder {
+public class NEOEncoder implements IntegratedEncoder, Encoder {
   private final CANEncoder encoder;
 
   private CalculableRatio ratio;
@@ -22,10 +22,12 @@ public class NEOEncoder implements Encoder {
     this.ratio = ratio;
   }
 
+  @Override
   public boolean getInverted() {
     return inverted;
   }
 
+  @Override
   public void setInverted(boolean inverted) {
     this.inverted = inverted;
   }
@@ -35,6 +37,7 @@ public class NEOEncoder implements Encoder {
     return getPosition();
   }
 
+  @Override
   public void setdistancePerRotation(double distancePerRotation) {
     if (ratio == null) {
       encoder.setPositionConversionFactor(distancePerRotation);
@@ -48,27 +51,28 @@ public class NEOEncoder implements Encoder {
     }
   }
 
-  public double getdistancePerRotation() {
+  @Override
+  public double getPositionConversionFactor() {
     return encoder.getPositionConversionFactor();
   }
 
-  public double getPosition() {
-    return getPos();
+  @Override
+  public double getVelocityConversionFactor() {
+    return encoder.getVelocityConversionFactor();
   }
 
-  public double getVelocity() {
-    return getVel();
-  }
-
+  @Override
   public void zero() {
     encoder.setPosition(0.0);
   }
 
+  @Override
   public void zero(double value) {
     encoder.setPosition(value);
   }
 
-  private double getPos() {
+  @Override
+  public double getPosition() {
     int factor;
 
     if (inverted) {
@@ -80,7 +84,8 @@ public class NEOEncoder implements Encoder {
     return encoder.getPosition() * factor;
   }
 
-  private double getVel() {
+  @Override
+  public double getVelocity() {
     int factor;
 
     if (inverted) {

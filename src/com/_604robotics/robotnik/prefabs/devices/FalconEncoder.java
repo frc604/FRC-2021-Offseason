@@ -4,7 +4,7 @@ import com._604robotics.robotnik.prefabs.motorcontrol.QuixTalonFX;
 import com._604robotics.robotnik.prefabs.motorcontrol.gearing.CalculableRatio;
 import com.ctre.phoenix.motorcontrol.TalonFXSensorCollection;
 
-public class FalconEncoder implements Encoder {
+public class FalconEncoder implements IntegratedEncoder, Encoder {
   private final TalonFXSensorCollection sensors;
 
   private CalculableRatio ratio;
@@ -23,10 +23,12 @@ public class FalconEncoder implements Encoder {
     conversionFactor = ratio.calculate(1.0);
   }
 
+  @Override
   public boolean getInverted() {
     return inverted;
   }
 
+  @Override
   public void setInverted(boolean inverted) {
     this.inverted = inverted;
   }
@@ -36,6 +38,7 @@ public class FalconEncoder implements Encoder {
     return getPosition();
   }
 
+  @Override
   public void setdistancePerRotation(double distancePerRotation) {
     if (ratio == null) {
       conversionFactor = distancePerRotation * (1.0 / 2048.0);
@@ -44,31 +47,28 @@ public class FalconEncoder implements Encoder {
     }
   }
 
-  public double getPositonConversionFactor() {
+  @Override
+  public double getPositionConversionFactor() {
     return conversionFactor;
   }
 
+  @Override
   public double getVelocityConversionFactor() {
     return conversionFactor * (1000.0 / 1.0);
   }
-
-  public double getPosition() {
-    return getPos();
-  }
-
-  public double getVelocity() {
-    return getVel();
-  }
-
+  
+  @Override
   public void zero() {
     sensors.setIntegratedSensorPosition(0.0, 0);
   }
-
+  
+  @Override
   public void zero(double value) {
     sensors.setIntegratedSensorPosition(value * conversionFactor, 0);
   }
-
-  private double getPos() {
+  
+  @Override
+  public double getPosition() {
     double factor;
 
     if (inverted) {
@@ -79,8 +79,9 @@ public class FalconEncoder implements Encoder {
 
     return sensors.getIntegratedSensorPosition() * factor * conversionFactor;
   }
-
-  private double getVel() {
+  
+  @Override
+  public double getVelocity() {
     double factor;
 
     if (inverted) {
