@@ -4,18 +4,9 @@ import com._604robotics.marionette.InputPlayer;
 import com._604robotics.marionette.InputRecorder;
 import com._604robotics.marionette.InputRecording;
 import com._604robotics.marionette.MarionetteJoystick;
-import com._604robotics.robot2020.auto.macros.AutoCenterMacro;
 import com._604robotics.robot2020.constants.Calibration;
-import com._604robotics.robot2020.modules.AntiJamRoller;
-import com._604robotics.robot2020.modules.Drive;
-import com._604robotics.robot2020.modules.Intake;
-import com._604robotics.robot2020.modules.IntakeDeploy;
-import com._604robotics.robot2020.modules.Revolver;
-import com._604robotics.robot2020.modules.Shooter;
-import com._604robotics.robot2020.modules.Tower;
 import com._604robotics.robotnik.Coordinator;
 import com._604robotics.robotnik.Logger;
-import com._604robotics.robotnik.prefabs.auto.FalconDashboard;
 import com._604robotics.robotnik.prefabs.flow.SmartTimer;
 import com._604robotics.robotnik.prefabs.flow.Toggle;
 import com._604robotics.robotnik.prefabs.inputcontroller.xbox.XboxController;
@@ -222,7 +213,6 @@ public class TeleopMode extends Coordinator {
   }
 
   private void process() {
-    FalconDashboard.getInstance().publishRobotPose(robot.drive.getPose());
     driveManager.run();
     shooterManager.run();
     intakeManager.run();
@@ -381,138 +371,6 @@ public class TeleopMode extends Coordinator {
       }
     }
   }
-
-  private class ShooterManager {
-    private final Shooter.Setpoint setpoint;
-    private final Shooter.Move move;
-    private final Shooter.Stop stop;
-    private final Tower.Empty emptyTower;
-    private final Tower.Idle idleTower;
-    private final Revolver.Empty emptyRevolver;
-    private final Revolver.Idle idleRevolver;
-    private final AntiJamRoller.AntiJam roller;
-    private final AntiJamRoller.Idle rollerIdle;
-
-    private final SmartTimer shootTimer;
-
-    private Toggle shooterToggle;
-
-    private double shooterSetpoint = 600.0;
-
-    public ShooterManager() {
-      setpoint = robot.shooter.setpoint;
-      move = robot.shooter.move;
-      emptyTower = robot.tower.empty;
-      emptyRevolver = robot.revolver.empty;
-
-      stop = robot.shooter.stop;
-      idleTower = robot.tower.idle;
-      idleRevolver = robot.revolver.idle;
-
-      roller = robot.antiJamRoller.antiJam;
-      rollerIdle = robot.antiJamRoller.idle;
-
-      shootTimer = new SmartTimer();
-
-      shooterToggle = new Toggle(false);
-      SmartDashboard.putNumber("Shooter Speed", 10.0);
-    }
-
-    public void run() {
-      double speed = SmartDashboard.getNumber("Shooter Speed", 10.0);
-      shooterSetpoint = MathUtil.clamp(speed, 0, 50);
-
-      shooterToggle.update(driverA && !setpoint.isRunning());
-      shooterToggle.update(driverB && setpoint.isRunning());
-
-      if (shooterToggle.isInOnState()) {
-        setpoint.setpoint.set(driverLeftTrigger * 300);
-        // System.out.println(driverLeftTrigger);
-        setpoint.activate();
-      } else if (shooterToggle.isInOffState()) {
-        stop.activate();
-      }
-      if (driverY && setpoint.isRunning()) {
-        emptyTower.activate();
-        emptyRevolver.activate();
-      }
-
-      // System.out.println(driverLeftTrigger);
-      // move.power.set(driverLeftTrigger * 0.25);
-      // move.activate();
-    }
-  }
-
-  private class IntakeManager {
-    private final Intake.Suck suck;
-    private final Intake.Idle idle;
-    private final IntakeDeploy.Deploy deploy;
-    private final IntakeDeploy.Retract retract;
-    private final Tower.AntiJam antiJam;
-    private final Revolver.Intake revolve;
-    private final AntiJamRoller.AntiJam roller;
-
-    public IntakeManager() {
-      suck = robot.intake.suck;
-      idle = robot.intake.idle;
-      deploy = robot.intakeDeploy.deploy;
-      retract = robot.intakeDeploy.retract;
-      antiJam = robot.tower.antiJam;
-      revolve = robot.revolver.intake;
-      roller = robot.antiJamRoller.antiJam;
-    }
-
-    public void run() {
-      if (driverRightTrigger >= 0.05) {
-        deploy.activate();
-        suck.activate();
-        revolve.activate();
-        roller.activate();
-        antiJam.activate();
-      } else {
-        retract.activate();
-        idle.activate();
-      }
-    }
-  }
-
-  // private class AutoCenterManager {
-  //   private ProfiledPIDController anglePID;
-
-  //   public void setOutput(double output) {
-  //     driveManager.arcade.rotatePower.set(output);
-  //   }
-
-  //   public AutoCenterManager() {
-
-  //     anglePID =
-  //         new ProfiledPIDController(
-  //             Calibration.AutoAlign.kP,
-  //             0.0,
-  //             Calibration.AutoAlign.kD,
-  //             new TrapezoidProfile.Constraints(1, 0.1),
-  //             () -> -1.0 * robot.limelight.limelightX.get(),
-  //             this::setOutput);
-
-  //     anglePID.setTolerance(Calibration.AutoAlign.ABSOLUTE_TOLERANCE_OUTER_GOAL);
-  //   }
-
-  //   public void run() {
-  //     robot.limelight.scan.activate();
-
-  //     if (robot.limelight.limelightHasTargets.get()) {
-  //       anglePID.setEnabled(true);
-  //       System.out.println(anglePID.get());
-  //     } else {
-  //       this.end();
-  //     }
-  //   }
-
-  //   public void end() {
-  //     anglePID.setEnabled(false);
-  //     anglePID.reset();
-  //   }
-  // }
 
   public enum CurrentDrive {
     IDLE,
