@@ -25,7 +25,16 @@ public class Robot2020 extends Robot {
   public final PowerMonitor powerMonitor =
       PowerMonitor.getInstance(Ports.PDP_MODULE, Ports.COMPRESSOR);
 
-  public final Drive drive = addModule(new Drive());
+  public final Intake intake = addModule(new Intake());
+  public final IntakeDeploy intakeDeploy = addModule(new IntakeDeploy());
+
+  public final Revolver revolver = addModule(new Revolver());
+
+  public final AntiJamRoller antiJamRoller = addModule(new AntiJamRoller());
+
+  public final Tower tower = addModule(new Tower());
+
+  public final Swerve drive = addModule(new Swerve());
 
   public final DisabledMode disabledMode = setDisabledMode(new DisabledMode(this));
   public final TeleopMode teleopMode = setTeleopMode(new TeleopMode(this));

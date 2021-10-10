@@ -58,7 +58,7 @@ public class QuixSwerveModuleState implements Comparable<QuixSwerveModuleState> 
    * @return Optimized swerve module state.
    */
   public static QuixSwerveModuleState optimize(QuixSwerveModuleState desiredState, Rotation2d currentAngle) {
-    var targetAngle = Rotation2d.fromDegrees(placeInScope(currentAngle.getDegrees(), desiredState.angle.getDegrees()));
+    var targetAngle = Rotation2d.fromDegrees(placeInAppropriate0To360Scope(currentAngle.getDegrees(), desiredState.angle.getDegrees()));
     var targetSpeed = desiredState.speedMetersPerSecond;
 
     var delta = targetAngle.minus(currentAngle);
@@ -71,21 +71,46 @@ public class QuixSwerveModuleState implements Comparable<QuixSwerveModuleState> 
     }
   }
 
-  private static double placeInScope(double currentAngle, double desiredAngle) {
-    // Place the desired angle in the scope [360(n-1), 360(n)] of the current angle.
-    double angle = Math.floor(currentAngle / 360.0) * 360.0 + mod(desiredAngle, 360);
+  // private static double placeInScope(double currentAngle, double desiredAngle) {
+  //   // Place the desired angle in the scope [360(n-1), 360(n)] of the current angle.
+  //   double angle = Math.floor(currentAngle / 360.0) * 360.0 + mod(desiredAngle, 360);
 
-    // Constraint the desired angle to be < 180 degrees from the current angle.
-    if ((angle - currentAngle) > 180) {
-        angle -= 360;
-    } else if ((angle - currentAngle) < -180) {
-        angle += 360;
-    }
+  //   // Constraint the desired angle to be < 180 degrees from the current angle.
+  //   if ((angle - currentAngle) > 180) {
+  //       angle -= 360;
+  //   } else if ((angle - currentAngle) < -180) {
+  //       angle += 360;
+  //   }
     
-    return angle;
-}
+  //   return angle;
+  // }
 
-private static double mod(double a, double n) {
-    return (a % n + n) % n;
-}
+  private static double placeInAppropriate0To360Scope(double scopeReference, double newAngle) {
+    double lowerBound;
+    double upperBound;
+    double lowerOffset = scopeReference % 360;
+    if (lowerOffset >= 0) {
+        lowerBound = scopeReference - lowerOffset;
+        upperBound = scopeReference + (360 - lowerOffset);
+    } else {
+        upperBound = scopeReference - lowerOffset;
+        lowerBound = scopeReference - (360 + lowerOffset);
+    }
+    while (newAngle < lowerBound) {
+        newAngle += 360;
+    }
+    while (newAngle > upperBound) {
+        newAngle -= 360;
+    }
+    if (newAngle - scopeReference > 180) {
+        newAngle -= 360;
+    } else if (newAngle - scopeReference < -180) {
+        newAngle += 360;
+    }
+    return newAngle;
+  }
+
+  private static double mod(double a, double n) {
+      return (a % n + n) % n;
+  }
 }

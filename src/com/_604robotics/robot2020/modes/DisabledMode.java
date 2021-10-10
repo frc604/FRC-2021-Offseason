@@ -56,29 +56,29 @@ public class DisabledMode extends Coordinator {
 
   @Override
   public boolean run() {
-    robot.drive.updateOdometry();
+    // robot.drive.updateOdometry();
 
-    // Search Gamepieces
-    if (SmartDashboard.getBoolean("Enable Searching", false)) {
-      VisionManager.getInstance().update();
-      List<Translation2d> balls =
-          robot.ballCam.searchGamePiece(robot.drive.getPose(), GamePiece.POWERCELL);
-      String ballString = "";
-      for (Translation2d ball : balls) {
-        ballString = ballString + ball.toString() + " ";
-      }
-      SmartDashboard.putString("Balls", ballString);
+    // // Search Gamepieces
+    // if (SmartDashboard.getBoolean("Enable Searching", false)) {
+    //   VisionManager.getInstance().update();
+    //   List<Translation2d> balls =
+    //       robot.ballCam.searchGamePiece(robot.drive.getPose(), GamePiece.POWERCELL);
+    //   String ballString = "";
+    //   for (Translation2d ball : balls) {
+    //     ballString = ballString + ball.toString() + " ";
+    //   }
+    //   SmartDashboard.putString("Balls", ballString);
 
-      if (SmartDashboard.getBoolean("Send Obstacles", false) && !sent) {
-        livePlan.publishObstacles(balls, 0.088);
-        sent = true;
-      }
-    }
+    //   if (SmartDashboard.getBoolean("Send Obstacles", false) && !sent) {
+    //     livePlan.publishObstacles(balls, 0.088);
+    //     sent = true;
+    //   }
+    // }
 
-    if (SmartDashboard.getBoolean("Load Selected Path", false)) {
-      robot.autonomousMode.getReader().loadChosenFile();
-      SmartDashboard.putBoolean("Load Selected Path", false);
-    }
+    // if (SmartDashboard.getBoolean("Load Selected Path", false)) {
+    //   robot.autonomousMode.getReader().loadChosenFile();
+    //   SmartDashboard.putBoolean("Load Selected Path", false);
+    // }
 
     return true;
   }

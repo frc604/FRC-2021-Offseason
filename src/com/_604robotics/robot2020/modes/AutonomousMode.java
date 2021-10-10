@@ -7,10 +7,6 @@ import static com._604robotics.robot2020.constants.Calibration.Auto.MAX_CENTRIPE
 import static com._604robotics.robot2020.constants.Calibration.Auto.MAX_SPEED_METERS_PER_SECOND;
 
 import com._604robotics.robot2020.Robot2020;
-import com._604robotics.robot2020.auto.SparkTrajectoryTracker;
-import com._604robotics.robot2020.auto.angular.SparkAngularTrajectoryTracker;
-import com._604robotics.robot2020.auto.paths.QuikPlanPreGen;
-import com._604robotics.robot2020.auto.paths.QuikPlanSearch;
 import com._604robotics.robot2020.constants.Calibration;
 import com._604robotics.robotnik.Coordinator;
 import com._604robotics.robotnik.DashboardManager;
@@ -52,138 +48,139 @@ public class AutonomousMode extends Coordinator {
             .registerEnumOutput(
                 "Auton Mode Chooser", AutonMode.QUIX_PLAN_PREGEN, AutonMode.class, robot.drive);
 
-    trajectoryCreator =
-        new TrajectoryCreator(
-            robot.drive.driveKinematics,
-            Calibration.Auto.TRACKER_CONSTANTS,
-            new DifferentialDriveKinematicsConstraint(
-                robot.drive.driveKinematics, MAX_SPEED_METERS_PER_SECOND),
-            new DifferentialDriveVoltageConstraint(
-                new SimpleMotorFeedforward(
-                    KS_VOLTS, KV_VOLT_SECONDS_PER_METER, KA_VOLT_SECONDS_SQUARED_PER_METER),
-                robot.drive.driveKinematics,
-                10),
-            new CentripetalAccelerationConstraint(
-                MAX_CENTRIPETAL_ACCELERATION_RADIANS_PER_SECOND_SQUARED));
+    // trajectoryCreator =
+    //     new TrajectoryCreator(
+    //         robot.drive.driveKinematics,
+    //         Calibration.Auto.TRACKER_CONSTANTS,
+    //         new DifferentialDriveKinematicsConstraint(
+    //             robot.drive.driveKinematics, MAX_SPEED_METERS_PER_SECOND),
+    //         new DifferentialDriveVoltageConstraint(
+    //             new SimpleMotorFeedforward(
+    //                 KS_VOLTS, KV_VOLT_SECONDS_PER_METER, KA_VOLT_SECONDS_SQUARED_PER_METER),
+    //             robot.drive.driveKinematics,
+    //             10),
+    //         new CentripetalAccelerationConstraint(
+    //             MAX_CENTRIPETAL_ACCELERATION_RADIANS_PER_SECOND_SQUARED));
 
-    reader = new QuikPlanReader(robot.drive);
+    // reader = new QuikPlanReader(robot.drive);
   }
 
   @Override
   public void begin() {
-    System.out.println(autonMode.get());
-    robot.drive.setIdleMode(IdleMode.kCoast);
+    // System.out.println(autonMode.get());
+    // robot.drive.setIdleMode(IdleMode.kCoast);
 
-    reader.loadChosenFile();
+    // reader.loadChosenFile();
 
-    switch (autonMode.get()) {
-      case MANUAL:
-        selectedModeMacro = robot.teleopMode;
-        break;
-      case FAILSAFE_FORWARD_12:
-        selectedModeMacro = new FallForwardMacro();
-        break;
-      case TURN_IN_PLACE_LEFT:
-        selectedModeMacro = new TurnInPlaceLeft();
-        break;
-      case FAILSAFE_BACKWARD_12:
-        selectedModeMacro = new FallBackMacro();
-        break;
-        // case FULL_FIELD_10_BALL:
-        //   selectedModeMacro = new QuikPlanPreGen(robot, reader);
-        //   break;
-      case QUIX_PLAN_PREGEN:
-        selectedModeMacro = new QuikPlanPreGen(robot, reader);
-        break;
-      case GALATIC_SEARCH:
-        robot.disabledMode.livePlan.loadTrajectory();
-        selectedModeMacro = new QuikPlanSearch(robot, robot.disabledMode.livePlan);
-        break;
-      case OFF:
-      default:
-        selectedModeMacro = null;
-        break;
-    }
+    // switch (autonMode.get()) {
+    //   case MANUAL:
+    //     selectedModeMacro = robot.teleopMode;
+    //     break;
+    //   case FAILSAFE_FORWARD_12:
+    //     selectedModeMacro = new FallForwardMacro();
+    //     break;
+    //   case TURN_IN_PLACE_LEFT:
+    //     selectedModeMacro = new TurnInPlaceLeft();
+    //     break;
+    //   case FAILSAFE_BACKWARD_12:
+    //     selectedModeMacro = new FallBackMacro();
+    //     break;
+    //     // case FULL_FIELD_10_BALL:
+    //     //   selectedModeMacro = new QuikPlanPreGen(robot, reader);
+    //     //   break;
+    //   case QUIX_PLAN_PREGEN:
+    //     selectedModeMacro = new QuikPlanPreGen(robot, reader);
+    //     break;
+    //   case GALATIC_SEARCH:
+    //     robot.disabledMode.livePlan.loadTrajectory();
+    //     selectedModeMacro = new QuikPlanSearch(robot, robot.disabledMode.livePlan);
+    //     break;
+    //   case OFF:
+    //   default:
+    //     selectedModeMacro = null;
+    //     break;
+    // }
 
-    System.out.println(selectedModeMacro);
-    robot.drive.disableMotorSafety();
+    // System.out.println(selectedModeMacro);
+    // robot.drive.disableMotorSafety();
 
-    if (selectedModeMacro != null) {
-      selectedModeMacro.start();
-    }
+    // if (selectedModeMacro != null) {
+    //   selectedModeMacro.start();
+    // }
   }
 
   @Override
   public boolean run() {
-    robot.drive.updateOdometry();
+    // robot.drive.updateOdometry();
 
-    if (selectedModeMacro == null) {
-      return false;
-    }
-    return selectedModeMacro.execute();
+    // if (selectedModeMacro == null) {
+    //   return false;
+    // }
+    // return selectedModeMacro.execute();
+    return false;
   }
 
   @Override
   public void end() {
-    robot.drive.enableMotorSafety();
-    robot.drive.setIdleMode(IdleMode.kCoast);
-    if (selectedModeMacro != null) {
-      selectedModeMacro.stop();
-    }
+    // robot.drive.enableMotorSafety();
+    // robot.drive.setIdleMode(IdleMode.kCoast);
+    // if (selectedModeMacro != null) {
+    //   selectedModeMacro.stop();
+    // }
   }
 
-  public QuikPlanReader getReader() {
-    return reader;
-  }
+  // public QuikPlanReader getReader() {
+  //   return reader;
+  // }
 
-  private class FallBackMacro extends StatefulCoordinator {
-    public FallBackMacro() {
-      super(FallBackMacro.class);
+  // private class FallBackMacro extends StatefulCoordinator {
+  //   public FallBackMacro() {
+  //     super(FallBackMacro.class);
 
-      addState("Pathfind back 144in", new PathReverse(Units.inchesToMeters(36)));
-    }
-  }
+  //     addState("Pathfind back 144in", new PathReverse(Units.inchesToMeters(36)));
+  //   }
+  // }
 
-  private class FallForwardMacro extends StatefulCoordinator {
-    public FallForwardMacro() {
-      super(FallForwardMacro.class);
+  // private class FallForwardMacro extends StatefulCoordinator {
+  //   public FallForwardMacro() {
+  //     super(FallForwardMacro.class);
 
-      addState("Pathfind forward 144in", new PathStraight(Units.inchesToMeters(36)));
-    }
-  }
+  //     addState("Pathfind forward 144in", new PathStraight(Units.inchesToMeters(36)));
+  //   }
+  // }
 
-  private class PathStraight extends SparkTrajectoryTracker {
+  // private class PathStraight extends SparkTrajectoryTracker {
 
-    public PathStraight(double meters) {
-      super(
-          trajectoryCreator.getTrajectory(
-              List.of(new Pose2d(), new Pose2d(meters, 0, new Rotation2d(0))), false),
-          robot.drive,
-          Calibration.Auto.TRACKER_CONSTANTS);
-    }
-  }
+  //   public PathStraight(double meters) {
+  //     super(
+  //         trajectoryCreator.getTrajectory(
+  //             List.of(new Pose2d(), new Pose2d(meters, 0, new Rotation2d(0))), false),
+  //         robot.drive,
+  //         Calibration.Auto.TRACKER_CONSTANTS);
+  //   }
+  // }
 
-  private class PathReverse extends SparkTrajectoryTracker {
+  // private class PathReverse extends SparkTrajectoryTracker {
 
-    public PathReverse(double meters) {
-      super(
-          trajectoryCreator.getTrajectory(
-              List.of(new Pose2d(), new Pose2d(-meters, 0, new Rotation2d(0))), true),
-          robot.drive,
-          Calibration.Auto.TRACKER_CONSTANTS);
-    }
-  }
+  //   public PathReverse(double meters) {
+  //     super(
+  //         trajectoryCreator.getTrajectory(
+  //             List.of(new Pose2d(), new Pose2d(-meters, 0, new Rotation2d(0))), true),
+  //         robot.drive,
+  //         Calibration.Auto.TRACKER_CONSTANTS);
+  //   }
+  // }
 
-  private class TurnInPlaceLeft extends SparkAngularTrajectoryTracker {
+  // private class TurnInPlaceLeft extends SparkAngularTrajectoryTracker {
 
-    public TurnInPlaceLeft() {
-      super(
-          new TurnInPlaceTrajectory(
-              new Pose2d(), Rotation2d.fromDegrees(-360.0), new AngularMotionConstraint(2, 1)),
-          robot.drive,
-          Calibration.Auto.TRACKER_CONSTANTS);
-    }
-  }
+  //   public TurnInPlaceLeft() {
+  //     super(
+  //         new TurnInPlaceTrajectory(
+  //             new Pose2d(), Rotation2d.fromDegrees(-360.0), new AngularMotionConstraint(2, 1)),
+  //         robot.drive,
+  //         Calibration.Auto.TRACKER_CONSTANTS);
+  //   }
+  // }
 
   public enum AutonMode {
     OFF,

@@ -89,12 +89,12 @@ test {
     }
 }
 
-spotless {
-  java {
-    googleJavaFormat()
-    paddedCell()
-  }
-}
+// spotless {
+//   java {
+//     googleJavaFormat()
+//     paddedCell()
+//   }
+// }
 
 // Maven central needed for JUnit
 repositories {

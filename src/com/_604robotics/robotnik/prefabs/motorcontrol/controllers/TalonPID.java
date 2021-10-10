@@ -9,6 +9,7 @@ import com.ctre.phoenix.motorcontrol.can.TalonFX;
 
 public class TalonPID extends MotorControllerPID{
   public TalonFX controller;
+  private FalconEncoder encoder;
 
   /**
    * A wrapper representing a PID controller running on a REV Robotics SparkMAX.
@@ -23,9 +24,9 @@ public class TalonPID extends MotorControllerPID{
   public TalonPID(QuixTalonFX talon, FalconEncoder encoder, MotorControllerPIDConfig config) {
     super(talon, encoder, config);
     this.controller = talon.controller;
+    this.encoder = encoder;
 
     this.controller.configSelectedFeedbackSensor(TalonFXFeedbackDevice.IntegratedSensor, 0, 0);
-    this.controller.configSelectedFeedbackCoefficient(encoder.getPositionConversionFactor());
 
     this.setConfig(config);
   }
@@ -40,14 +41,14 @@ public class TalonPID extends MotorControllerPID{
   public void setSetpointVelocity(double setpoint, double feedforwardVolts) {
     this.controller.set(
         TalonFXControlMode.Velocity,
-        setpoint * (1.0 / 100.0),
+        (setpoint / encoder.getPositionConversionFactor()) * (1.0 / 100.0),
         DemandType.ArbitraryFeedForward,
         feedforwardVolts / 12.0);
   }
 
   @Override
   public void setSetpointPosition(double setpoint) {
-    this.controller.set(TalonFXControlMode.Position, setpoint, DemandType.ArbitraryFeedForward, 0.0);
+    this.controller.set(TalonFXControlMode.Position, (setpoint / encoder.getPositionConversionFactor()), DemandType.ArbitraryFeedForward, 0.0);
   }
 
   @Override

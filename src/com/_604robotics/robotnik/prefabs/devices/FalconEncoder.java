@@ -64,7 +64,7 @@ public class FalconEncoder implements IntegratedEncoder, Encoder {
   
   @Override
   public void zero(double value) {
-    sensors.setIntegratedSensorPosition(value * conversionFactor, 0);
+    sensors.setIntegratedSensorPosition(value / conversionFactor, 0);
   }
   
   @Override

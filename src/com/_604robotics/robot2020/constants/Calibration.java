@@ -2,8 +2,11 @@ package com._604robotics.robot2020.constants;
 
 import com._604robotics.quixsam.mathematics.DoubleInterpolatableTreeMap;
 import com._604robotics.robotnik.prefabs.auto.TrackerConstants;
+import com._604robotics.robotnik.prefabs.motorcontrol.gearing.GearRatio;
 import com._604robotics.robotnik.utils.annotations.Unreal;
 import edu.wpi.first.wpilibj.controller.SimpleMotorFeedforward;
+import edu.wpi.first.wpilibj.geometry.Translation2d;
+import edu.wpi.first.wpilibj.util.Units;
 
 public class Calibration {
 
@@ -77,12 +80,20 @@ public class Calibration {
 
   public static final class Drive {
     public static final boolean GYRO_REVERSED = false;
-    public static final double TRACK_WIDTH = 0.61595;
-    public static final double WHEEL_DIAMETER = 0.1524;
-    public static final double DISTANCE_PER_ROTATION = (WHEEL_DIAMETER * Math.PI);
-    public static final double DISTANCE_PER_COUNT = DISTANCE_PER_ROTATION / 2048;
+    public static final double TRACK_WIDTH = Units.inchesToMeters(20.5);
+    public static final double WHEEL_BASE = Units.inchesToMeters(25.5);
+    public static final double WHEEL_DIAMETER = Units.inchesToMeters(4);
 
-    public static final double SLOW_ROTATION_MODIFIER = 0.6;
+    public static final GearRatio DRIVE_RATIO = new GearRatio(1, 6.86);
+    public static final GearRatio STEERING_RATIO = new GearRatio(1, 12.8);
+
+    public static final double MAX_DRIVE_VELOCITY = 4.5;
+    public static final double MAX_ANGULAR_VELOCITY = 11.5;
+
+    public static final Translation2d FRONT_LEFT_POS = new Translation2d(WHEEL_BASE / 2.0, TRACK_WIDTH / 2.0);
+    public static final Translation2d FRONT_RIGHT_POS = new Translation2d(WHEEL_BASE / 2.0, -TRACK_WIDTH / 2.0);
+    public static final Translation2d REAR_LEFT_POS = new Translation2d(-WHEEL_BASE / 2.0, TRACK_WIDTH / 2.0);
+    public static final Translation2d REAR_RIGHT_POS = new Translation2d(-WHEEL_BASE / 2.0, -TRACK_WIDTH / 2.0);
   }
 
   public static final class AutoAlign {

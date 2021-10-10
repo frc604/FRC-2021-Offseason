@@ -5,14 +5,16 @@ import com._604robotics.marionette.InputRecorder;
 import com._604robotics.marionette.InputRecording;
 import com._604robotics.marionette.MarionetteJoystick;
 import com._604robotics.robot2020.constants.Calibration;
+import com._604robotics.robot2020.modules.AntiJamRoller;
+import com._604robotics.robot2020.modules.Intake;
+import com._604robotics.robot2020.modules.IntakeDeploy;
+import com._604robotics.robot2020.modules.Revolver;
+import com._604robotics.robot2020.modules.Swerve;
+import com._604robotics.robot2020.modules.Tower;
 import com._604robotics.robotnik.Coordinator;
 import com._604robotics.robotnik.Logger;
-import com._604robotics.robotnik.prefabs.flow.SmartTimer;
 import com._604robotics.robotnik.prefabs.flow.Toggle;
 import com._604robotics.robotnik.prefabs.inputcontroller.xbox.XboxController;
-import com.revrobotics.CANSparkMax.IdleMode;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpiutil.math.MathUtil;
 
 public class TeleopMode extends Coordinator {
 
@@ -31,7 +33,7 @@ public class TeleopMode extends Coordinator {
 
   private final DriveManager driveManager;
   private final IntakeManager intakeManager;
-  private final ShooterManager shooterManager;
+  // private final ShooterManager shooterManager;
   // private final AutoCenterManager autoCenterManager;
 
   private boolean autoCentering = false;
@@ -69,7 +71,7 @@ public class TeleopMode extends Coordinator {
 
     driveManager = new DriveManager();
     intakeManager = new IntakeManager();
-    shooterManager = new ShooterManager();
+    // shooterManager = new ShooterManager();
     // autoCenterManager = new AutoCenterManager();
   }
 
@@ -140,7 +142,6 @@ public class TeleopMode extends Coordinator {
     if (inputPlayer.isPlaying()) {
       logger.info("Playing back Marionette recording");
     }
-    robot.drive.setIdleMode(IdleMode.kCoast);
     hatchCollisionChecker = false;
     armCollisionChecker = false;
   }
@@ -214,16 +215,15 @@ public class TeleopMode extends Coordinator {
 
   private void process() {
     driveManager.run();
-    shooterManager.run();
+    // shooterManager.run();
     intakeManager.run();
   }
 
   private class DriveManager {
-    private final Drive.ArcadeDrive arcade;
-    private final Drive.TankDrive tank;
-    private final Drive.Idle idle;
+    private final Swerve.OpenLoop openLoop;
+    private final Swerve.Idle idle;
 
-    private final AutoCenterMacro autoCenterMacro;
+    // private final AutoCenterMacro autoCenterMacro;
 
     private CurrentDrive currentDrive;
     private CurrentDrive selectedDrive;
@@ -231,151 +231,113 @@ public class TeleopMode extends Coordinator {
 
     public DriveManager() {
       idle = robot.drive.new Idle();
-      arcade = robot.drive.new ArcadeDrive(true);
-      tank = robot.drive.new TankDrive();
+      openLoop = robot.drive.new OpenLoop();
 
-      autoCenterMacro = new AutoCenterMacro(arcade, robot.limelight, false);
+      // autoCenterMacro = new AutoCenterMacro(arcade, robot.limelight, false);
 
-      currentDrive = CurrentDrive.ARCADE;
+      currentDrive = CurrentDrive.OPENLOOP;
       inverted = new Toggle(false);
     }
 
     public void run() {
-      robot.drive.updateOdometry();
-
-      robot.drive.shifter.highGear.activate();
-
-      double leftY = driver.leftStick.y.get();
-      double rightY = driver.rightStick.y.get();
+      double leftX = -driver.leftStick.x.get();
+      double leftY = -driver.leftStick.y.get();
       double rightX = driver.rightStick.x.get();
 
       if (driverLeftJoystickButton) {
+        leftX *= 0.8;
         leftY *= 0.8;
-        rightY *= 0.8;
         rightX *= 0.8;
       }
 
       inverted.update(driverLeftBumper);
       if (inverted.isInOnState()) { // Flip values if xbox inverted
+        leftX *= -1;
         leftY *= -1;
-        rightY *= -1;
       }
 
-      // Get Dashboard option for drive
-      switch (robot.drive.driveMode.get()) {
-        case OFF:
-          currentDrive = CurrentDrive.IDLE;
-          selectedDrive = CurrentDrive.IDLE;
-          break;
-        case ARCADE:
-          currentDrive = CurrentDrive.ARCADE;
-          selectedDrive = CurrentDrive.ARCADE;
-          break;
-        case TANK:
-          currentDrive = CurrentDrive.TANK;
-          selectedDrive = CurrentDrive.TANK;
-          break;
-        case DYNAMIC:
-          // Dynamic Drive mode detection logic
-          if (currentDrive == CurrentDrive.TANK) {
-            if (Math.abs(rightY) <= 0.2 && Math.abs(rightX) > 0.3) {
-              currentDrive = CurrentDrive.ARCADE;
-              selectedDrive = CurrentDrive.ARCADE;
-            }
-          } else { // currentDrive == CurrentDrive.ARCADE
-            if (Math.abs(rightX) <= 0.2 && Math.abs(rightY) > 0.3) {
-              currentDrive = CurrentDrive.TANK;
-            }
-          }
-          break;
-        default:
-          System.out.println("This should never happen!");
-          System.out.println("Current value is:" + robot.drive.driveMode.get());
-      }
-
-      if (driverStart) {
-        robot.climber.climb.activate();
-      } else if (driverBack) {
-        robot.climber.retract.activate();
-      } else {
-        robot.climber.idle.activate();
-      }
-
-      // Limelight Activation Code
-      // It would be bad if this turned off
-      // robot.limelight.limelightLED.set(Limelight.LEDState.ON.ordinal());
-      if (driverX) {
-        robot.limelight.scan.activate();
-        arcade.activate();
-
-        // robot.drive.shifter.lowGear.activate();
-
-        if (robot.limelight.limelightHasTargets.get()) {
-          currentDrive = CurrentDrive.MANUAL; // Disable manual control so the PID can take over
-          arcade.movePower.set(leftY); // Still allow driver to control forward/backwards
-          // movement
-          autoCenterMacro.start();
-          autoCenterMacro.execute();
-
-          if (autoCenterMacro.aligned()) {
-            driver.rumble.setEnabled(true);
-            driver.rumble.setRumble(1);
-            aligned = true;
-          } else {
-            aligned = false;
-            driver.rumble.setEnabled(false);
-          }
-        } else {
-          driver.rumble.setEnabled(false);
-          robot.limelight.scan.activate();
-          autoCenterMacro.stop();
-          currentDrive = selectedDrive;
-        }
-
-      } else {
-        driver.rumble.setEnabled(false);
-        autoCenterMacro.stop();
-
-        switch (robot.limelight.visionMode.get()) {
-          case DRIVER:
-            robot.limelight.driver.activate();
-            break;
-          case VISION:
-            robot.limelight.scan.activate();
-            break;
-          default:
-            robot.limelight.scan.activate();
-        }
-      }
+      // // Get Dashboard option for drive
+      // switch (robot.drive.driveMode.get()) {
+      //   case OFF:
+      //     currentDrive = CurrentDrive.IDLE;
+      //     selectedDrive = CurrentDrive.IDLE;
+      //     break;
+      //   case ARCADE:
+      //     currentDrive = CurrentDrive.ARCADE;
+      //     selectedDrive = CurrentDrive.ARCADE;
+      //     break;
+      //   case TANK:
+      //     currentDrive = CurrentDrive.TANK;
+      //     selectedDrive = CurrentDrive.TANK;
+      //     break;
+      //   case DYNAMIC:
+      //     // Dynamic Drive mode detection logic
+      //     if (currentDrive == CurrentDrive.TANK) {
+      //       if (Math.abs(rightY) <= 0.2 && Math.abs(rightX) > 0.3) {
+      //         currentDrive = CurrentDrive.ARCADE;
+      //         selectedDrive = CurrentDrive.ARCADE;
+      //       }
+      //     } else { // currentDrive == CurrentDrive.ARCADE
+      //       if (Math.abs(rightX) <= 0.2 && Math.abs(rightY) > 0.3) {
+      //         currentDrive = CurrentDrive.TANK;
+      //       }
+      //     }
+      //     break;
+      //   default:
+      //     System.out.println("This should never happen!");
+      //     System.out.println("Current value is:" + robot.drive.driveMode.get());
+      // }
 
       switch (currentDrive) {
         case IDLE:
           idle.activate();
           break;
-        case ARCADE:
-          arcade.movePower.set(leftY);
-          if (driverLeftJoystickButton) {
-            arcade.rotatePower.set(rightX * Calibration.Drive.SLOW_ROTATION_MODIFIER);
-          } else {
-            arcade.rotatePower.set(rightX);
-          }
-          arcade.activate();
+        case OPENLOOP:
+          openLoop.xPower.set(leftX * 0.2);
+          openLoop.yPower.set(leftY * 0.2);
+          openLoop.rotPower.set(rightX * 0.2);
+
+          openLoop.activate();
           break;
-        case TANK:
-          tank.leftPower.set(leftY);
-          tank.rightPower.set(rightY);
-          tank.activate();
-          break;
-        case MANUAL: // Disable driver control of the robot
-          break;
+      }
+    }
+  }
+
+  private class IntakeManager {
+    private final Intake.Suck suck;
+    private final Intake.Idle idle;
+    private final IntakeDeploy.Deploy deploy;
+    private final IntakeDeploy.Retract retract;
+    private final Tower.AntiJam antiJam;
+    private final Revolver.Intake revolve;
+    private final AntiJamRoller.AntiJam roller;
+
+    public IntakeManager() {
+      suck = robot.intake.suck;
+      idle = robot.intake.idle;
+      deploy = robot.intakeDeploy.deploy;
+      retract = robot.intakeDeploy.retract;
+      antiJam = robot.tower.antiJam;
+      revolve = robot.revolver.intake;
+      roller = robot.antiJamRoller.antiJam;
+    }
+
+    public void run() {
+      if (driverRightTrigger >= 0.05) {
+        deploy.activate();
+        suck.activate();
+        revolve.activate();
+        roller.activate();
+        antiJam.activate();
+      } else {
+        retract.activate();
+        idle.activate();
       }
     }
   }
 
   public enum CurrentDrive {
     IDLE,
-    ARCADE,
-    TANK,
-    MANUAL
+    OPENLOOP,
   }
 }
