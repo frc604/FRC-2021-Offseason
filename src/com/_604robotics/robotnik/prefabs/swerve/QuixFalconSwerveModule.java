@@ -8,6 +8,7 @@ import com._604robotics.robotnik.prefabs.motorcontrol.QuixTalonFX;
 import com._604robotics.robotnik.prefabs.motorcontrol.controllers.MotorControllerPIDConfig;
 import com._604robotics.robotnik.prefabs.motorcontrol.controllers.TalonPID;
 import com._604robotics.robotnik.prefabs.motorcontrol.gearing.CalculableRatio;
+import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.sensors.SensorInitializationStrategy;
 
 import edu.wpi.first.wpilibj.geometry.Translation2d;
@@ -65,6 +66,9 @@ public class QuixFalconSwerveModule extends QuixSwerveModule{
 
         driveMotor.setInverted(invertDriveMotor);
         steeringMotor.setInverted(invertSteeringMotor);
+
+        driveMotor.controller.setNeutralMode(NeutralMode.Brake);
+        steeringMotor.controller.setNeutralMode(NeutralMode.Coast);
 
         FalconEncoder driveEncoder = new FalconEncoder(driveMotor);
         FalconEncoder steeringEncoder = new FalconEncoder(steeringMotor);

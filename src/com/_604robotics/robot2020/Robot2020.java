@@ -34,6 +34,8 @@ public class Robot2020 extends Robot {
 
   public final Tower tower = addModule(new Tower());
 
+  public final Shooter shooter = addModule(new Shooter());
+
   public final Swerve drive = addModule(new Swerve());
 
   public final DisabledMode disabledMode = setDisabledMode(new DisabledMode(this));

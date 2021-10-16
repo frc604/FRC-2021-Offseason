@@ -10,8 +10,7 @@ import edu.wpi.first.wpilibj.util.Units;
 
 public class Calibration {
 
-  public static final double TELEOP_DRIVE_DEADBAND = 0.3;
-  public static final double TELEOP_MANIP_DEADBAND = 0.2;
+  public static final double TELEOP_DRIVE_DEADBAND = 0.1;
   public static final double TELEOP_FACTOR = -1;
 
   /* Climber Calibration */
@@ -30,20 +29,21 @@ public class Calibration {
   /* Revolver Calibration */
   public static final class Revolver {
     // public static final double EMPTY_SPEED = 0.75;
-    public static final double EMPTY_SPEED = -0.15;
+    public static final double EMPTY_SPEED = 0.75;
     public static final double INTAKE_SPEED = 0.5;
-    public static final double ANTI_JAM_SPEED = -1;
+    public static final double REVERSE_SPEED = -0.5;
   }
 
   /* Anti Jam Roller Calibration */
   public static final class AntiJamRoller {
     public static final double ANTI_JAM_SPEED = -0.25;
+    public static final double REVERSE_SPEED = 0.5;
   }
 
   /* Intake Calibration */
   public static final class Intake {
     public static final double INTAKE_SPEED = 0.75;
-    public static final double ANTI_JAM_SPEED = -1;
+    public static final double REVERSE_SPEED = -0.5;
   }
 
   /* Shooter Calibration */
@@ -68,7 +68,7 @@ public class Calibration {
   @Unreal("Get values from characterization.")
   public static final class Feeder {
     /* Velocity PD Controller */
-    public static final double kP = 0.0015;
+    public static final double kP = 0;
     public static final double kD = 0; // Multiplying by 0.02 to time parameterize it.
 
     /* Feedforward */
@@ -79,7 +79,7 @@ public class Calibration {
   }
 
   public static final class Drive {
-    public static final boolean GYRO_REVERSED = false;
+    public static final boolean GYRO_REVERSED = true;
     public static final double TRACK_WIDTH = Units.inchesToMeters(20.5);
     public static final double WHEEL_BASE = Units.inchesToMeters(25.5);
     public static final double WHEEL_DIAMETER = Units.inchesToMeters(4);

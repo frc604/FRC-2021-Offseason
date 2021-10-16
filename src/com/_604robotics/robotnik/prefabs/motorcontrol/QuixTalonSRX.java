@@ -2,6 +2,7 @@ package com._604robotics.robotnik.prefabs.motorcontrol;
 
 import com._604robotics.robotnik.Module;
 import com.ctre.phoenix.motorcontrol.InvertType;
+import com.ctre.phoenix.motorcontrol.StatusFrameEnhanced;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
 public class QuixTalonSRX extends MotorController {
@@ -17,6 +18,9 @@ public class QuixTalonSRX extends MotorController {
     controller = new WPI_TalonSRX(port);
     controller.configVoltageCompSaturation(12);
     controller.enableVoltageCompensation(true);
+
+    controller.setStatusFramePeriod(StatusFrameEnhanced.Status_1_General, 20);
+    controller.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, 100);
 
     PowerMonitor.getInstance().addController(this, name);
   }

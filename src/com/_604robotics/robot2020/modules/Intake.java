@@ -39,14 +39,14 @@ public class Intake extends Module {
     }
   }
 
-  public class AntiJam extends Action {
-    public AntiJam() {
-      super(Intake.this, AntiJam.class);
+  public class Reverse extends Action {
+    public Reverse() {
+      super(Intake.this, Reverse.class);
     }
 
     @Override
     public void run() {
-      intakeMotor.set(Calibration.Intake.ANTI_JAM_SPEED);
+      intakeMotor.set(Calibration.Intake.REVERSE_SPEED);
     }
   }
 
@@ -66,6 +66,6 @@ public class Intake extends Module {
 
   public final Idle idle = new Idle();
   public final Suck suck = new Suck();
-  public final AntiJam antiJam = new AntiJam();
+  public final Reverse reverse = new Reverse();
   public final Speed speed = new Speed();
 }

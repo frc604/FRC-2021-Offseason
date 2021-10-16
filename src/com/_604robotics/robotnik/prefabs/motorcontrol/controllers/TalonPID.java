@@ -2,6 +2,8 @@ package com._604robotics.robotnik.prefabs.motorcontrol.controllers;
 
 import com._604robotics.robotnik.prefabs.devices.FalconEncoder;
 import com._604robotics.robotnik.prefabs.motorcontrol.QuixTalonFX;
+import com._604robotics.robotnik.prefabs.swerve.Conversions;
+import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.DemandType;
 import com.ctre.phoenix.motorcontrol.TalonFXControlMode;
 import com.ctre.phoenix.motorcontrol.TalonFXFeedbackDevice;
@@ -26,7 +28,7 @@ public class TalonPID extends MotorControllerPID{
     this.controller = talon.controller;
     this.encoder = encoder;
 
-    this.controller.configSelectedFeedbackSensor(TalonFXFeedbackDevice.IntegratedSensor, 0, 0);
+    // this.controller.configSelectedFeedbackSensor(TalonFXFeedbackDevice.IntegratedSensor, 0, 0);
 
     this.setConfig(config);
   }
@@ -34,13 +36,13 @@ public class TalonPID extends MotorControllerPID{
   @Override
   public void setSetpointVelocity(double setpoint) {
     this.controller.set(
-        TalonFXControlMode.Velocity, setpoint * (1.0 / 100.0), DemandType.ArbitraryFeedForward, 0.0);
+      ControlMode.Velocity,  (setpoint / encoder.getPositionConversionFactor()) * (1.0 / 100.0), DemandType.ArbitraryFeedForward, 0.0);
   }
 
   @Override
   public void setSetpointVelocity(double setpoint, double feedforwardVolts) {
     this.controller.set(
-        TalonFXControlMode.Velocity,
+      ControlMode.Velocity,
         (setpoint / encoder.getPositionConversionFactor()) * (1.0 / 100.0),
         DemandType.ArbitraryFeedForward,
         feedforwardVolts / 12.0);
@@ -48,12 +50,14 @@ public class TalonPID extends MotorControllerPID{
 
   @Override
   public void setSetpointPosition(double setpoint) {
-    this.controller.set(TalonFXControlMode.Position, (setpoint / encoder.getPositionConversionFactor()), DemandType.ArbitraryFeedForward, 0.0);
+    this.controller.set(ControlMode.Position, (setpoint / encoder.getPositionConversionFactor()));
+    // System.out.println("Falcon: " + Conversions.degreesToFalcon(setpoint, 12.8));
+    // System.out.println("Conversion: " + (setpoint / encoder.getPositionConversionFactor()));
   }
 
   @Override
   public void setSetpointPosition(double setpoint, double feedforwardVolts) {
-    this.controller.set(TalonFXControlMode.Position, setpoint, DemandType.ArbitraryFeedForward, feedforwardVolts / 12.0);
+    this.controller.set(ControlMode.Position, (setpoint / encoder.getPositionConversionFactor()), DemandType.ArbitraryFeedForward, feedforwardVolts / 12.0);
   }
 
   @Override

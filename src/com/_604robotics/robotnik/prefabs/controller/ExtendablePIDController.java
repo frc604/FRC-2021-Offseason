@@ -78,7 +78,7 @@ public class ExtendablePIDController implements Sendable, AutoCloseable {
   protected double totalError;
 
   // The percentage or absolute error that is considered at setpoint.
-  protected double positionTolerance = 0.05;
+  protected double positionTolerance = Double.POSITIVE_INFINITY;
   protected double velocityTolerance = Double.POSITIVE_INFINITY;
 
   // Supplied setpoint

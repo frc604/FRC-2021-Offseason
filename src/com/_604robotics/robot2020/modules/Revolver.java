@@ -50,14 +50,14 @@ public class Revolver extends Module {
     }
   }
 
-  public class AntiJam extends Action {
-    public AntiJam() {
-      super(Revolver.this, AntiJam.class);
+  public class Reverse extends Action {
+    public Reverse() {
+      super(Revolver.this, Reverse.class);
     }
 
     @Override
     public void run() {
-      revolverMotor.set(Calibration.Intake.ANTI_JAM_SPEED);
+      revolverMotor.set(Calibration.Intake.REVERSE_SPEED);
     }
   }
 
@@ -78,6 +78,6 @@ public class Revolver extends Module {
   public final Idle idle = new Idle();
   public final Empty empty = new Empty();
   public final Intake intake = new Intake();
-  public final AntiJam antiJam = new AntiJam();
+  public final Reverse reverse = new Reverse();
   public final Speed speed = new Speed();
 }

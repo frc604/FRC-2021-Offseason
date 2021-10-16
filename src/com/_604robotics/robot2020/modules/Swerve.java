@@ -10,13 +10,17 @@ import com._604robotics.robotnik.prefabs.devices.ADIS16470;
 import com._604robotics.robotnik.prefabs.motorcontrol.controllers.MotorControllerPIDConfig;
 import com._604robotics.robotnik.prefabs.swerve.QuixFalconSwerveModule;
 import com._604robotics.robotnik.prefabs.swerve.QuixSwerveDriveKinematics;
+import com._604robotics.robotnik.prefabs.swerve.QuixSwerveDriveOdometry;
 import com._604robotics.robotnik.prefabs.swerve.QuixSwerveModule;
 import com._604robotics.robotnik.prefabs.swerve.QuixSwerveModuleState;
 
 import edu.wpi.first.wpilibj.AnalogGyro;
+import edu.wpi.first.wpilibj.BuiltInAccelerometer;
+import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
 import edu.wpi.first.wpilibj.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.util.Units;
 
 public class Swerve extends Module {
   /* Modules */
@@ -31,7 +35,7 @@ public class Swerve extends Module {
     false,
     false,
     new MotorControllerPIDConfig(0.0, 0.0, 0.0),
-    new MotorControllerPIDConfig(0.2, 0.0, 1.0),
+    new MotorControllerPIDConfig(0.6, 0.0, 12.0),
     Calibration.Drive.DRIVE_RATIO,
     Calibration.Drive.STEERING_RATIO,
     76.64,
@@ -50,7 +54,7 @@ public class Swerve extends Module {
     false,
     false,
     new MotorControllerPIDConfig(0.0, 0.0, 0.0),
-    new MotorControllerPIDConfig(0.2, 0.0, 1.0),
+    new MotorControllerPIDConfig(0.6, 0.0, 12.0),
     Calibration.Drive.DRIVE_RATIO,
     Calibration.Drive.STEERING_RATIO,
     203.03,
@@ -69,7 +73,7 @@ public class Swerve extends Module {
     false,
     false,
     new MotorControllerPIDConfig(0.0, 0.0, 0.0),
-    new MotorControllerPIDConfig(0.2, 0.0, 1.0),
+    new MotorControllerPIDConfig(0.6, 0.0, 12.0),
     Calibration.Drive.DRIVE_RATIO,
     Calibration.Drive.STEERING_RATIO,
     211.38,
@@ -88,7 +92,7 @@ public class Swerve extends Module {
     false,
     false,
     new MotorControllerPIDConfig(0.0, 0.0, 0.0),
-    new MotorControllerPIDConfig(0.2, 0.0, 1.0),
+    new MotorControllerPIDConfig(0.6, 0.0, 12.0),
     Calibration.Drive.DRIVE_RATIO,
     Calibration.Drive.STEERING_RATIO,
     93.25,
@@ -109,24 +113,28 @@ public class Swerve extends Module {
   private final ADIS16470 imu = ADIS16470.getInstance();
 
   /* Kinematics */
-  public QuixSwerveDriveKinematics driveKinematics = new QuixSwerveDriveKinematics(
+  public QuixSwerveDriveKinematics kinematics = new QuixSwerveDriveKinematics(
     frontLeft.getPosition(),
     frontRight.getPosition(),
     rearLeft.getPosition(),
     rearRight.getPosition()
   );
 
+  /* Odometry */
+  public QuixSwerveDriveOdometry odometry = new QuixSwerveDriveOdometry(
+    kinematics,
+    getHeading(),
+    new Pose2d(Units.feetToMeters(1), Units.feetToMeters(0), Rotation2d.fromDegrees(180))
+  );
 
   /* Outputs */
-  /*
   private final BuiltInAccelerometer accel = new BuiltInAccelerometer();
   public final Output<Double> xAccel = addOutput("X accel", accel::getX);
   public final Output<Double> yAccel = addOutput("Y accel", accel::getY);
   public final Output<Double> zAccel = addOutput("Z accel", accel::getZ);
-  */
 
-  public final Output<Double> xAccel = addOutput("X accel", imu::getXAccel);
-  public final Output<Double> yAccel = addOutput("Y accel", imu::getYAccel);
+  public final Output<Double> imuXAccel = addOutput("IMU X accel", imu::getXAccel);
+  public final Output<Double> imuYAccel = addOutput("IMU Y accel", imu::getYAccel);
 
   public final Output<Double> gyroAngle = addOutput("gyroAngle", imu::getAngle);
 
@@ -140,14 +148,50 @@ public class Swerve extends Module {
   public final Output<Double> absrearLeftAngle = addOutput("Abs Rear Left Angle", rearLeft::getAbsEncoderAngle);
   public final Output<Double> absrearRightAngle = addOutput("Abs Rear Right Angle", rearRight::getAbsEncoderAngle);
 
-  // public final Output<Double> robotHeading = addOutput("Robot Heading", this::getHeading);
-  // public final Output<Double> robotX = addOutput("Robot X Position", this::getX);
-  // public final Output<Double> robotY = addOutput("Robot Y Position", this::getY);
+  public final Output<Double> robotHeading = addOutput("Robot Heading", this::getHeadingDegrees);
+  public final Output<Double> robotX = addOutput("Robot X Position", this::getX);
+  public final Output<Double> robotY = addOutput("Robot Y Position", this::getY);
+  
+  
   
   /* Auton Methods */
-  public double getHeading() {
-    var angle = -imu.getAngle() * (Calibration.Drive.GYRO_REVERSED ? -1.0 : 1.0);
-    return Math.IEEEremainder(angle, 360);
+  public Rotation2d getHeading() {
+    return (Calibration.Drive.GYRO_REVERSED) ? Rotation2d.fromDegrees(360 - imu.getAngle()) : Rotation2d.fromDegrees(imu.getAngle());
+    // var angle = -imu.getAngle() * (Calibration.Drive.GYRO_REVERSED ? -1.0 : 1.0);
+    // return Rotation2d.fromDegrees(Math.IEEEremainder(angle, 360));
+  }
+
+  public Pose2d getPose() {
+    return odometry.getPoseMeters();
+  }
+
+  public double getHeadingDegrees() {
+    return getHeading().getDegrees();
+  }
+
+  public double getRawHeadingDegrees() {
+    return -imu.getAngle();
+  }
+
+  public double getAngularVelDegrees() {
+    return imu.getRate() * (Calibration.Drive.GYRO_REVERSED ? -1.0 : 1.0);
+  }
+
+  public double getX() {
+    return getPose().getTranslation().getX();
+  }
+
+  public double getY() {
+    return getPose().getTranslation().getY();
+  }
+
+  public void zeroOdometry(Pose2d pose) {
+    odometry.resetPosition(pose, getHeading());
+  }
+
+  public void zeroGyro() {
+    imu.calibrate();
+    imu.reset();
   }
 
   public void setModuleStates(boolean openLoop, QuixSwerveModuleState... desiredStates) {
@@ -162,12 +206,12 @@ public class Swerve extends Module {
   
   public void drive(Translation2d translation, double rotation, boolean fieldRelative) {
     QuixSwerveModuleState[] swerveModuleStates =
-      driveKinematics.toSwerveModuleStates(
+      kinematics.toSwerveModuleStates(
           fieldRelative ? ChassisSpeeds.fromFieldRelativeSpeeds(
                               translation.getX(), 
                               translation.getY(), 
                               rotation, 
-                              new Rotation2d(getHeading())
+                              getHeading()
                           )
                           : new ChassisSpeeds(
                               translation.getX(), 
@@ -215,10 +259,57 @@ public class Swerve extends Module {
     public void run() {
       Translation2d translation = new Translation2d(yPower.get(), xPower.get()).times(Calibration.Drive.MAX_DRIVE_VELOCITY);
       double rotation = rotPower.get() * Calibration.Drive.MAX_ANGULAR_VELOCITY;
-      drive(translation, rotation, false);
+      drive(translation, rotation, true);
     }
   }
 
+  public class AutoAngle extends Action {
+    public final Input<Double> xPower;
+    public final Input<Double> yPower;
+    public final Input<Double> desiredAngularVel;
+
+    public AutoAngle() {
+      this(0.0, 0.0, 0.0);
+    }
+
+    public AutoAngle(double defaultXPower, double defaultYPower, double defaultDesiredAngularVel) {
+      super(Swerve.this, AutoAngle.class);
+      xPower = addInput("XPower", defaultXPower, true);
+      yPower = addInput("YPower", defaultYPower, true);
+      desiredAngularVel = addInput("RotHeading", defaultDesiredAngularVel, true);
+    }
+
+    @Override
+    public void run() {
+      Translation2d translation = new Translation2d(yPower.get(), xPower.get()).times(Calibration.Drive.MAX_DRIVE_VELOCITY);
+      drive(translation, desiredAngularVel.get(), true);
+    }
+  }
+
+  public class Auto extends Action {
+    public final Input<QuixSwerveModuleState[]> moduleStates;
+    public final Input<double[]> feedforwards;
+
+    public Auto() {
+      this(new QuixSwerveModuleState[4], new double[4]);
+    }
+
+    public Auto(QuixSwerveModuleState[] defaultModuleStates, double[] defaultFeedforwards) {
+      super(Swerve.this, Auto.class);
+      moduleStates = addInput("ModuleStates", defaultModuleStates, true);
+      feedforwards = addInput("Feedforwards", defaultFeedforwards, true);
+    }
+
+    @Override
+    public void run() {
+      var desiredStates = moduleStates.get();
+      var desiredFeedforwards = feedforwards.get();
+      // QuixSwerveDriveKinematics.normalizeWheelSpeeds(desiredStates, Calibration.Drive.MAX_DRIVE_VELOCITY);
+      for(QuixSwerveModule module : modules){ 
+        // module.setDesiredStateClosedLoop(desiredStates[module.getID()], desiredFeedforwards[module.getID()]);
+      }
+    }
+  }
 
   public final Action idle = new Idle();
 
@@ -229,88 +320,19 @@ public class Swerve extends Module {
       module.zeroToAbsPosition();
     }
 
-    // frontLeft.resetParams();
-    // frontRight.resetParams();
-    // rearLeft.resetParams();
-    // rearRight.resetParams();
 
-    // robotDrive.setRightSideInverted(false);
+    horizGyro.setSensitivity(0.00665);
+    imu.calibrate();
 
-    // horizGyro.setSensitivity(0.00665);
-    // imu.calibrate();
-
-    // /* Follower */
-    // frontRight.setInverted(true);
-
-    // rearLeft.follow(frontLeft, false);
-    // rearRight.follow(frontRight, false);
-
-    // /* Encoders */
-    // encoderLeft.setInverted(false);
-    // encoderRight.setInverted(false);
-
-    // encoderLeft.setdistancePerRotation(Calibration.Drive.DISTANCE_PER_ROTATION);
-    // encoderRight.setdistancePerRotation(Calibration.Drive.DISTANCE_PER_ROTATION);
-
-    // externalEncoderLeft.setDistancePerPulse(Calibration.Drive.DISTANCE_PER_COUNT);
-    // externalEncoderRight.setDistancePerPulse(Calibration.Drive.DISTANCE_PER_COUNT);
-
-    // /* Current Limits */
-    // frontLeft.setCurrentLimit(75);
-    // frontLeft.enableCurrentLimit(true);
-
-    // frontRight.setCurrentLimit(75);
-    // frontRight.enableCurrentLimit(true);
-
-    // rearLeft.setCurrentLimit(75);
-    // rearLeft.enableCurrentLimit(true);
-
-    // rearRight.setCurrentLimit(75);
-    // rearRight.enableCurrentLimit(true);
-
-    // /* Braking */
-    // setIdleMode(IdleMode.kCoast);
-
-    // /* Deadband */
-    // robotDrive.setDeadband(0.04);
-
-    // /* Choosers */
+    /* Choosers */
     // driveMode =
     //     DashboardManager.getInstance()
     //         .registerEnumOutput("Drive Mode Chooser", DriveMode.ARCADE, DriveMode.class, this);
 
-    // /* Init */
-    // resetSensors();
-    // setDefaultAction(idle);
+    /* Init */
+    setDefaultAction(idle);
 
-    // leftPID = new SparkPID(frontLeft, Calibration.Auto.KP_DRIVE_VELCOTIY, 0.0, 0.0);
-    // rightPID = new SparkPID(frontRight, Calibration.Auto.KP_DRIVE_VELCOTIY, 0.0, 0.0);
-
-    // leftController =
-    //     new ExtendablePIDController(
-    //         Calibration.Auto.KP_DRIVE_VELCOTIY,
-    //         0.0,
-    //         0.0,
-    //         externalEncoderLeft::getRate,
-    //         frontLeft::setVoltage,
-    //         0.01);
-    // rightController =
-    //     new ExtendablePIDController(
-    //         Calibration.Auto.KP_DRIVE_VELCOTIY,
-    //         0.0,
-    //         0.0,
-    //         externalEncoderRight::getRate,
-    //         frontRight::setVoltage,
-    //         0.01);
-
-    // leftController.setOutputRange(-12, 12);
-    // rightController.setOutputRange(-12, 12);
-
-    // /* Burning 🔥 */
-    // frontLeft.burnFlashConditionally(false);
-    // frontRight.burnFlashConditionally(false);
-    // rearLeft.burnFlashConditionally(false);
-    // rearRight.burnFlashConditionally(false);
+    /* Burning 🔥 */
   }
 
   public enum DriveMode {

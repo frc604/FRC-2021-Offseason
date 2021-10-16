@@ -42,7 +42,7 @@ public class Ports {
   /* Shooter */
   public static final int SHOOTER_LEFT_MOTOR = 8;
   public static final int SHOOTER_RIGHT_MOTOR = 9;
-  public static final int SHOOTER_FEEDER_MOTOR = 1;
+  public static final int SHOOTER_FEEDER_MOTOR = 10;
 
   /* CAN Devices */
   public static final int COMPRESSOR = 0; // AKA PCM

@@ -9,12 +9,25 @@ import com._604robotics.robot2020.modules.AntiJamRoller;
 import com._604robotics.robot2020.modules.Intake;
 import com._604robotics.robot2020.modules.IntakeDeploy;
 import com._604robotics.robot2020.modules.Revolver;
+import com._604robotics.robot2020.modules.Shooter;
 import com._604robotics.robot2020.modules.Swerve;
 import com._604robotics.robot2020.modules.Tower;
 import com._604robotics.robotnik.Coordinator;
 import com._604robotics.robotnik.Logger;
+import com._604robotics.robotnik.prefabs.controller.ProfiledPIDController;
+import com._604robotics.robotnik.prefabs.flow.SmartTimer;
 import com._604robotics.robotnik.prefabs.flow.Toggle;
 import com._604robotics.robotnik.prefabs.inputcontroller.xbox.XboxController;
+import com._604robotics.robotnik.prefabs.motion.MotionConstraints;
+import com._604robotics.robotnik.prefabs.motion.MotionState;
+import com._604robotics.robotnik.prefabs.motion.TrapezoidalMotionProfile;
+import com._604robotics.robotnik.prefabs.swerve.QuixSwerveModuleState;
+
+import edu.wpi.first.wpilibj.controller.PIDController;
+import edu.wpi.first.wpilibj.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.trajectory.TrapezoidProfile;
+import edu.wpi.first.wpiutil.math.MathUtil;
 
 public class TeleopMode extends Coordinator {
 
@@ -33,7 +46,7 @@ public class TeleopMode extends Coordinator {
 
   private final DriveManager driveManager;
   private final IntakeManager intakeManager;
-  // private final ShooterManager shooterManager;
+  private final ShooterManager shooterManager;
   // private final AutoCenterManager autoCenterManager;
 
   private boolean autoCentering = false;
@@ -55,14 +68,8 @@ public class TeleopMode extends Coordinator {
     driver.rightStick.x.setFactor(1); // WEIRD_WHY_?FES:RLJTH *ROHT guirg
     driver.rightStick.y.setFactor(Calibration.TELEOP_FACTOR);
 
-    manip.leftStick.x.setDeadband(Calibration.TELEOP_MANIP_DEADBAND);
-    manip.leftStick.y.setDeadband(Calibration.TELEOP_MANIP_DEADBAND);
-
     manip.leftStick.x.setFactor(Calibration.TELEOP_FACTOR);
     manip.leftStick.y.setFactor(Calibration.TELEOP_FACTOR);
-
-    manip.rightStick.x.setDeadband(Calibration.TELEOP_MANIP_DEADBAND);
-    manip.rightStick.y.setDeadband(Calibration.TELEOP_MANIP_DEADBAND);
 
     manip.rightStick.x.setFactor(Calibration.TELEOP_FACTOR);
     manip.rightStick.y.setFactor(Calibration.TELEOP_FACTOR);
@@ -71,7 +78,7 @@ public class TeleopMode extends Coordinator {
 
     driveManager = new DriveManager();
     intakeManager = new IntakeManager();
-    // shooterManager = new ShooterManager();
+    shooterManager = new ShooterManager();
     // autoCenterManager = new AutoCenterManager();
   }
 
@@ -215,25 +222,38 @@ public class TeleopMode extends Coordinator {
 
   private void process() {
     driveManager.run();
-    // shooterManager.run();
     intakeManager.run();
+    shooterManager.run();
   }
 
   private class DriveManager {
     private final Swerve.OpenLoop openLoop;
+      private final Swerve.AutoAngle autoAngle;
     private final Swerve.Idle idle;
 
-    // private final AutoCenterMacro autoCenterMacro;
-
     private CurrentDrive currentDrive;
-    private CurrentDrive selectedDrive;
+    // private CurrentDrive selectedDrive;
+
+    private ProfiledPIDController snappingController;
+
     private Toggle inverted;
+    
+    private boolean isSnapping = false;
+
 
     public DriveManager() {
       idle = robot.drive.new Idle();
       openLoop = robot.drive.new OpenLoop();
+      autoAngle = robot.drive.new AutoAngle();
 
-      // autoCenterMacro = new AutoCenterMacro(arcade, robot.limelight, false);
+      snappingController = new ProfiledPIDController(
+        0.05, 0.0, 0.0,
+        new TrapezoidProfile.Constraints(360.0, 270.0),
+        robot.drive::getRawHeadingDegrees,
+        (value) -> autoAngle.desiredAngularVel.set(-value)
+      );
+
+      snappingController.setOutputRange(-1000, 1000);
 
       currentDrive = CurrentDrive.OPENLOOP;
       inverted = new Toggle(false);
@@ -250,10 +270,16 @@ public class TeleopMode extends Coordinator {
         rightX *= 0.8;
       }
 
-      inverted.update(driverLeftBumper);
-      if (inverted.isInOnState()) { // Flip values if xbox inverted
-        leftX *= -1;
-        leftY *= -1;
+      if (driverStart) {
+        robot.drive.zeroGyro();
+      }
+
+      if (driverY || driverA || driverB || driverX) {
+        currentDrive = CurrentDrive.SNAPPING;
+      }
+
+      if (Math.abs(rightX) > 0.1) {
+        currentDrive = CurrentDrive.OPENLOOP;
       }
 
       // // Get Dashboard option for drive
@@ -293,51 +319,195 @@ public class TeleopMode extends Coordinator {
           idle.activate();
           break;
         case OPENLOOP:
-          openLoop.xPower.set(leftX * 0.2);
-          openLoop.yPower.set(leftY * 0.2);
-          openLoop.rotPower.set(rightX * 0.2);
+          isSnapping = false;
+          openLoop.xPower.set(leftX * 0.5);
+          openLoop.yPower.set(leftY * 0.5);
+          openLoop.rotPower.set(rightX * 0.5);
 
           openLoop.activate();
           break;
+        case SNAPPING:
+          autoAngle.xPower.set(leftX);
+          autoAngle.yPower.set(leftY);
+
+          if (driverY) {
+            snapTo(CardinalDirections.NORTH);
+          } else if (driverA) {
+            snapTo(CardinalDirections.SOUTH);
+          } else if (driverB) {
+            snapTo(CardinalDirections.EAST);
+          } else if (driverX) {
+            snapTo(CardinalDirections.WEST);
+          }
+
+          autoAngle.activate();
+          break;
       }
+    }
+
+    private void snapTo(CardinalDirections direction) {
+      Rotation2d snapAngle = new Rotation2d();
+      switch (direction) {
+        case NORTH:
+          snapAngle = Rotation2d.fromDegrees(0);
+          break;
+        case EAST:
+          snapAngle = Rotation2d.fromDegrees(-90);
+          break;
+        case SOUTH:
+          snapAngle = Rotation2d.fromDegrees(180);
+          break;
+        case WEST:
+          snapAngle = Rotation2d.fromDegrees(90);
+          break;
+      }
+
+      SmartDashboard.putNumber("Error", snappingController.getPositionError());
+      SmartDashboard.putNumber("Output", snappingController.getGoal().position);
+
+      snappingController.setGoal(placeInScope(robot.drive.getRawHeadingDegrees(), snapAngle.getDegrees()));
+
+      if (!isSnapping) {
+        snappingController.setInitialState(new TrapezoidProfile.State(robot.drive.getHeadingDegrees(), robot.drive.getAngularVelDegrees()));
+        snappingController.enable();
+        isSnapping = true;
+      }
+
+      // if (snappingController.atSetpoint()) {
+      //   snappingController.disable();
+      //   isSnapping = false;
+      // }
     }
   }
 
   private class IntakeManager {
     private final Intake.Suck suck;
     private final Intake.Idle idle;
+    private final Intake.Reverse reverseIntake;
     private final IntakeDeploy.Deploy deploy;
     private final IntakeDeploy.Retract retract;
     private final Tower.AntiJam antiJam;
     private final Revolver.Intake revolve;
+    private final Revolver.Reverse reverseRevolver;
     private final AntiJamRoller.AntiJam roller;
+    private final AntiJamRoller.Reverse reverseRoller;
 
     public IntakeManager() {
       suck = robot.intake.suck;
       idle = robot.intake.idle;
+      reverseIntake = robot.intake.reverse;
       deploy = robot.intakeDeploy.deploy;
       retract = robot.intakeDeploy.retract;
       antiJam = robot.tower.antiJam;
       revolve = robot.revolver.intake;
+      reverseRevolver = robot.revolver.reverse;
       roller = robot.antiJamRoller.antiJam;
+      reverseRoller = robot.antiJamRoller.reverse;
     }
 
     public void run() {
-      if (driverRightTrigger >= 0.05) {
+      if (driverLeftTrigger >= 0.2) {
         deploy.activate();
         suck.activate();
         revolve.activate();
         roller.activate();
         antiJam.activate();
+      } else if (driverLeftBumper) {
+        reverseIntake.activate();
+        reverseRevolver.activate();
+        reverseRoller.activate();
       } else {
         retract.activate();
-        idle.activate();
       }
     }
+  }
+
+  private class ShooterManager {
+    private final Shooter.Setpoint setpoint;
+    private final Shooter.Move move;
+    private final Shooter.Stop stop;
+    private final Tower.Empty emptyTower;
+    private final Tower.Idle idleTower;
+    private final Revolver.Empty emptyRevolver;
+    private final Revolver.Idle idleRevolver;
+    private final AntiJamRoller.AntiJam roller;
+    private final AntiJamRoller.Idle rollerIdle;
+
+    private final SmartTimer shootTimer;
+
+    private Toggle shooterToggle;
+
+    private double shooterSetpoint = 600.0;
+
+    public ShooterManager() {
+      setpoint = robot.shooter.setpoint;
+      move = robot.shooter.move;
+      emptyTower = robot.tower.empty;
+      emptyRevolver = robot.revolver.empty;
+
+      stop = robot.shooter.stop;
+      idleTower = robot.tower.idle;
+      idleRevolver = robot.revolver.idle;
+
+      roller = robot.antiJamRoller.antiJam;
+      rollerIdle = robot.antiJamRoller.idle;
+
+      shootTimer = new SmartTimer();
+
+      shooterToggle = new Toggle(false);
+      SmartDashboard.putNumber("Shooter Speed", 10.0);
+    }
+
+    public void run() {
+      double speed = SmartDashboard.getNumber("Shooter Speed", 10.0);
+      shooterSetpoint = MathUtil.clamp(speed, 0, 50);
+
+      shooterToggle.update(driverRightTrigger > 0.5);
+
+      if (driverRightTrigger > 0.5) {
+        setpoint.setpoint.set(600.0);
+        setpoint.activate();
+      } else {
+        stop.activate();
+      }
+
+      if (driverRightBumper) {
+        emptyTower.activate();
+        emptyRevolver.activate();
+        roller.activate();
+      }
+
+    }
+  }
+
+  private static double placeInScope(double currentAngle, double desiredAngle) {
+    // Place the desired angle in the scope [360(n-1), 360(n)] of the current angle.
+    double angle = Math.floor(currentAngle / 360.0) * 360.0 + mod(desiredAngle, 360);
+
+    // Constraint the desired angle to be < 180 degrees from the current angle.
+    if ((angle - currentAngle) > 180) {
+        angle -= 360;
+    } else if ((angle - currentAngle) < -180) {
+        angle += 360;
+    }
+    
+    return angle;
+  }
+
+  private static double mod(double a, double n) {
+    return (a % n + n) % n;
   }
 
   public enum CurrentDrive {
     IDLE,
     OPENLOOP,
+    SNAPPING,
+  }
+
+  private enum CardinalDirections {
+    NORTH,
+    SOUTH,
+    EAST,
+    WEST,
   }
 }

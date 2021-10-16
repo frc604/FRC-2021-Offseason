@@ -6,7 +6,9 @@ import com._604robotics.robotnik.prefabs.devices.IntegratedEncoder;
 import com._604robotics.robotnik.prefabs.motorcontrol.MotorController;
 import com._604robotics.robotnik.prefabs.motorcontrol.controllers.MotorControllerPID;
 import com._604robotics.robotnik.prefabs.motorcontrol.gearing.CalculableRatio;
+import com.ctre.phoenix.motorcontrol.ControlMode;
 
+import edu.wpi.first.wpilibj.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
 
@@ -28,6 +30,8 @@ public abstract class QuixSwerveModule {
     protected double angleOffset;
     protected double wheelDiameter;
     protected double maxDriveVelocity;
+
+    private double lastAngle;
 
 
     public QuixSwerveModule(
@@ -65,24 +69,60 @@ public abstract class QuixSwerveModule {
         this.wheelDiameter = wheelDiameter;
         this.maxDriveVelocity = maxDriveVelocity;
         
+        this.driveMotor.setCurrentLimit(40);
+        this.driveMotor.enableCurrentLimit(true);
+
+        this.steeringMotor.setCurrentLimit(30);
+        this.steeringMotor.enableCurrentLimit(true);
+        
         this.driveEncoder.setdistancePerRotation(this.driveRatio.calculate(wheelDiameter));
-        this.steeringEncoder.setdistancePerRotation(this.steeringRatio.calculate(2.0 * Math.PI));
+        this.steeringEncoder.setdistancePerRotation(this.steeringRatio.calculate(360.0));
+
+        lastAngle = getState().angle.getDegrees();
 
         zeroToAbsPosition();
     }
 
-    public void setDesiredStateClosedLoop(QuixSwerveModuleState desiredState) {
+    // public void setDesiredStateClosedLoop(QuixSwerveModuleState desiredState) {
+    //     desiredState = QuixSwerveModuleState.optimize(desiredState, getState().angle);
+
+    //     drivePID.setSetpointVelocity(desiredState.speedMetersPerSecond);
+
+    //     if (desiredState.speedMetersPerSecond >= 1e-6) {
+    //         steeringPID.setSetpointPosition(desiredState.angle.getRadians());
+    //     }
+    // }
+
+    // public void setDesiredStateClosedLoop(QuixSwerveModuleState desiredState, double feedforwardVolts) {
+    //     desiredState = QuixSwerveModuleState.optimize(desiredState, getState().angle);
+
+    //     drivePID.setSetpointVelocity(desiredState.speedMetersPerSecond, feedforwardVolts);
+
+    //     if (desiredState.speedMetersPerSecond >= 1e-6) {
+    //         steeringPID.setSetpointPosition(desiredState.angle.getRadians());
+    //     }
+    // }
+
+    // public void setDesiredStateOpenLoop(QuixSwerveModuleState desiredState) {
+    //     desiredState = QuixSwerveModuleState.optimize(desiredState, getState().angle);
+
+    //     driveMotor.set(desiredState.speedMetersPerSecond / maxDriveVelocity);
+    
+    //     if (desiredState.speedMetersPerSecond >= 1e-3) {
+    //         steeringPID.setSetpointPosition(desiredState.angle.getRadians());
+    //     }
+    // }
+
+
+    public void setDesiredStateOpenLoop(QuixSwerveModuleState desiredState){
         desiredState = QuixSwerveModuleState.optimize(desiredState, getState().angle);
 
-        drivePID.setSetpointVelocity(desiredState.speedMetersPerSecond);
-        steeringPID.setSetpointPosition(desiredState.angle.getRadians());
-    }
+        double percentOutput = desiredState.speedMetersPerSecond / maxDriveVelocity;
+        driveMotor.set(percentOutput);
 
-    public void setDesiredStateOpenLoop(QuixSwerveModuleState desiredState) {
-        desiredState = QuixSwerveModuleState.optimize(desiredState, getState().angle);
-
-        driveMotor.set(desiredState.speedMetersPerSecond / maxDriveVelocity);
-        steeringPID.setSetpointPosition(desiredState.angle.getRadians());
+        double angle = (Math.abs(desiredState.speedMetersPerSecond) <= (maxDriveVelocity * 0.01)) ? lastAngle : desiredState.angle.getDegrees(); //Prevent rotating module if speed is less then 1%. Prevents Jittering.
+        steeringPID.setSetpointPosition(angle);
+        lastAngle = angle;
     }
 
     public int getID() {
@@ -98,16 +138,16 @@ public abstract class QuixSwerveModule {
     }
 
     public void zeroToAbsPosition() {
-        steeringEncoder.zero((absSteeringEncoder.getAbsPosition() - angleOffset) * (Math.PI / 180.0));
+        steeringEncoder.zero((absSteeringEncoder.getAbsPosition() - angleOffset));
     }
 
     public double getAngle() {
-        return this.steeringEncoder.getPosition() * (180.0 / Math.PI);
+        return this.steeringEncoder.getPosition();
     }
     
     public QuixSwerveModuleState getState(){
         double velocity = this.driveEncoder.getVelocity();
-        Rotation2d angle = new Rotation2d(this.steeringEncoder.getPosition());
+        Rotation2d angle = Rotation2d.fromDegrees(this.steeringEncoder.getPosition());
         return new QuixSwerveModuleState(velocity, angle);
     }
 }

@@ -38,6 +38,18 @@ public class AntiJamRoller extends Module {
     }
   }
 
+  public class Reverse extends Action {
+    public Reverse() {
+      super(AntiJamRoller.this, Reverse.class);
+    }
+
+    @Override
+    public void run() {
+      antiJamMotor.set(Calibration.AntiJamRoller.REVERSE_SPEED);
+    }
+  }
+
   public final Idle idle = new Idle();
   public final AntiJam antiJam = new AntiJam();
+  public final Reverse reverse = new Reverse();
 }
