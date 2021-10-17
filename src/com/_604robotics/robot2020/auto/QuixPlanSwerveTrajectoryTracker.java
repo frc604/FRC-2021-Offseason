@@ -11,33 +11,40 @@ import com._604robotics.robotnik.prefabs.swerve.QuixSwerveModuleState;
 import edu.wpi.first.wpilibj.controller.SimpleMotorFeedforward;
 
 public class QuixPlanSwerveTrajectoryTracker extends QuixPlanSwerveTrackingCoordinator {
-    private final SimpleMotorFeedforward feedforward;
     private final Swerve.Auto auto;
+    private final Swerve swerve;
 
     public QuixPlanSwerveTrajectoryTracker(QuikPlanSwerveReader reader, Swerve swerve, SwerveTrackerConstants constants) {
         super(reader, swerve, constants);
-        this.feedforward = constants.feedforward;
+        this.swerve = swerve;
 
         this.auto = swerve.new Auto();
     }
 
     @Override
     public void useOutput(QuixSwerveModuleState[] moduleStates) {
-        auto.moduleStates.set(moduleStates);
+        // auto.moduleStates.set(moduleStates);
 
-        double[] feedforwards = {};
-        for (int i = 0; i < moduleStates.length; i++) {
-            feedforwards[i] = feedforward.calculate(moduleStates[i].speedMetersPerSecond);
-        }
-        auto.feedforwards.set(feedforwards);
+        swerve.driveClosedLoop(moduleStates);
+
+        // System.out.println("Velocity: " + moduleStates[0].speedMetersPerSecond);
+        // System.out.println("Angle: " + moduleStates[0].angle);
 
         auto.activate();
     }
 
     @Override
     public void stop() {
-        auto.moduleStates.set(new QuixSwerveModuleState[4]);
-        auto.feedforwards.set(new double[4]);
+        QuixSwerveModuleState[] moduleStates = {
+            new QuixSwerveModuleState(),
+            new QuixSwerveModuleState(),
+            new QuixSwerveModuleState(),
+            new QuixSwerveModuleState()
+        };
+
+        swerve.driveClosedLoop(moduleStates);
+
+        // auto.moduleStates.set(moduleStates);
 
         auto.activate();
     }

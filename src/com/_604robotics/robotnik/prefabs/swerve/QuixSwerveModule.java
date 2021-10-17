@@ -24,6 +24,7 @@ public abstract class QuixSwerveModule {
     protected IntegratedEncoder steeringEncoder;
     protected MotorControllerPID drivePID;
     protected MotorControllerPID steeringPID;
+    protected SimpleMotorFeedforward driveFeedforward;
     protected CalculableRatio driveRatio;
     protected CalculableRatio steeringRatio;
 
@@ -46,6 +47,7 @@ public abstract class QuixSwerveModule {
         IntegratedEncoder steeringEncoder,
         MotorControllerPID drivePID,
         MotorControllerPID steeringPID,
+        SimpleMotorFeedforward driveFeedforward,
         CalculableRatio driveRatio,
         CalculableRatio steeringRatio,
         double angleOffset,
@@ -63,6 +65,7 @@ public abstract class QuixSwerveModule {
         this.steeringEncoder = steeringEncoder;
         this.drivePID = drivePID;
         this.steeringPID = steeringPID;
+        this.driveFeedforward = driveFeedforward;
         this.driveRatio = driveRatio;
         this.steeringRatio = steeringRatio;
         this.angleOffset = angleOffset;
@@ -75,7 +78,7 @@ public abstract class QuixSwerveModule {
         this.steeringMotor.setCurrentLimit(30);
         this.steeringMotor.enableCurrentLimit(true);
         
-        this.driveEncoder.setdistancePerRotation(this.driveRatio.calculate(wheelDiameter));
+        this.driveEncoder.setdistancePerRotation(this.driveRatio.calculate(Math.PI * wheelDiameter));
         this.steeringEncoder.setdistancePerRotation(this.steeringRatio.calculate(360.0));
 
         lastAngle = getState().angle.getDegrees();
@@ -112,6 +115,16 @@ public abstract class QuixSwerveModule {
     //         steeringPID.setSetpointPosition(desiredState.angle.getRadians());
     //     }
     // }
+
+    public void setDesiredStateClosedLoop(QuixSwerveModuleState desiredState){
+        desiredState = QuixSwerveModuleState.optimize(desiredState, getState().angle);
+
+        drivePID.setSetpointVelocity(desiredState.speedMetersPerSecond, driveFeedforward.calculate(desiredState.speedMetersPerSecond));
+
+        double angle = (Math.abs(desiredState.speedMetersPerSecond) <= (maxDriveVelocity * 0.01)) ? lastAngle : desiredState.angle.getDegrees(); //Prevent rotating module if speed is less then 1%. Prevents Jittering.
+        steeringPID.setSetpointPosition(angle);
+        lastAngle = angle;
+    }
 
 
     public void setDesiredStateOpenLoop(QuixSwerveModuleState desiredState){

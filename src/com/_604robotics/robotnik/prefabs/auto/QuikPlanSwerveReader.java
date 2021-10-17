@@ -32,6 +32,8 @@ public class QuikPlanSwerveReader {
     } catch (IOException e) {
       e.printStackTrace();
     }
+
+    System.out.println(files);
     this.chooser =
         DashboardManager.getInstance()
             .registerCollection("Quikplan Paths", files.get(0), files, module);

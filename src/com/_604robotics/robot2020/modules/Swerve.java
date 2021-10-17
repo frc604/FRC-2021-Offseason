@@ -34,8 +34,9 @@ public class Swerve extends Module {
     Ports.MODULE_0_ABS_ENCODER,
     false,
     false,
-    new MotorControllerPIDConfig(0.0, 0.0, 0.0),
+    new MotorControllerPIDConfig(0.001, 0.0, 0.0),
     new MotorControllerPIDConfig(0.6, 0.0, 12.0),
+    Calibration.Drive.DRIVE_FEEDFORWARD,
     Calibration.Drive.DRIVE_RATIO,
     Calibration.Drive.STEERING_RATIO,
     76.64,
@@ -53,8 +54,9 @@ public class Swerve extends Module {
     Ports.MODULE_1_ABS_ENCODER,
     false,
     false,
-    new MotorControllerPIDConfig(0.0, 0.0, 0.0),
+    new MotorControllerPIDConfig(0.001, 0.0, 0.0),
     new MotorControllerPIDConfig(0.6, 0.0, 12.0),
+    Calibration.Drive.DRIVE_FEEDFORWARD,
     Calibration.Drive.DRIVE_RATIO,
     Calibration.Drive.STEERING_RATIO,
     203.03,
@@ -72,8 +74,9 @@ public class Swerve extends Module {
     Ports.MODULE_2_ABS_ENCODER,
     false,
     false,
-    new MotorControllerPIDConfig(0.0, 0.0, 0.0),
+    new MotorControllerPIDConfig(0.001, 0.0, 0.0),
     new MotorControllerPIDConfig(0.6, 0.0, 12.0),
+    Calibration.Drive.DRIVE_FEEDFORWARD,
     Calibration.Drive.DRIVE_RATIO,
     Calibration.Drive.STEERING_RATIO,
     211.38,
@@ -91,8 +94,9 @@ public class Swerve extends Module {
     Ports.MODULE_3_ABS_ENCODER,
     false,
     false,
-    new MotorControllerPIDConfig(0.0, 0.0, 0.0),
+    new MotorControllerPIDConfig(0.001, 0.0, 0.0),
     new MotorControllerPIDConfig(0.6, 0.0, 12.0),
+    Calibration.Drive.DRIVE_FEEDFORWARD,
     Calibration.Drive.DRIVE_RATIO,
     Calibration.Drive.STEERING_RATIO,
     93.25,
@@ -124,7 +128,7 @@ public class Swerve extends Module {
   public QuixSwerveDriveOdometry odometry = new QuixSwerveDriveOdometry(
     kinematics,
     getHeading(),
-    new Pose2d(Units.feetToMeters(1), Units.feetToMeters(0), Rotation2d.fromDegrees(180))
+    new Pose2d(Units.feetToMeters(0), Units.feetToMeters(0), Rotation2d.fromDegrees(0))
   );
 
   /* Outputs */
@@ -185,6 +189,23 @@ public class Swerve extends Module {
     return getPose().getTranslation().getY();
   }
 
+  public QuixSwerveModuleState[] getModuleStates() {
+    QuixSwerveModuleState[] states = {frontLeft.getState(), frontRight.getState(), rearLeft.getState(), rearRight.getState()};
+    return states;
+  }
+
+  public void driveClosedLoop(QuixSwerveModuleState[] desiredStates) {
+    QuixSwerveDriveKinematics.normalizeWheelSpeeds(desiredStates, Calibration.Drive.MAX_DRIVE_VELOCITY);
+    
+    for(QuixSwerveModule module : modules){ 
+      module.setDesiredStateClosedLoop(desiredStates[module.getID()]);
+    }
+  }
+
+  public void updateOdometry() {
+    odometry.update(getHeading(), getModuleStates());
+  }
+
   public void zeroOdometry(Pose2d pose) {
     odometry.resetPosition(pose, getHeading());
   }
@@ -198,9 +219,7 @@ public class Swerve extends Module {
     QuixSwerveDriveKinematics.normalizeWheelSpeeds(desiredStates, Calibration.Drive.MAX_DRIVE_VELOCITY);
     
     for(QuixSwerveModule module : modules){
-        if (openLoop) {
-          module.setDesiredStateOpenLoop(desiredStates[module.getID()]);
-        }
+      module.setDesiredStateClosedLoop(desiredStates[module.getID()]);
     }
   }  
   
@@ -218,7 +237,6 @@ public class Swerve extends Module {
                               translation.getY(), 
                               rotation)
                           );
-    QuixSwerveDriveKinematics.normalizeWheelSpeeds(swerveModuleStates, Calibration.Drive.MAX_DRIVE_VELOCITY);
     setModuleStates(true, swerveModuleStates);
   }
 
@@ -287,27 +305,25 @@ public class Swerve extends Module {
   }
 
   public class Auto extends Action {
-    public final Input<QuixSwerveModuleState[]> moduleStates;
-    public final Input<double[]> feedforwards;
+    // public final Input<QuixSwerveModuleState[]> moduleStates;
 
     public Auto() {
-      this(new QuixSwerveModuleState[4], new double[4]);
+      this(new QuixSwerveModuleState[4]);
     }
 
-    public Auto(QuixSwerveModuleState[] defaultModuleStates, double[] defaultFeedforwards) {
+    public Auto(QuixSwerveModuleState[] defaultModuleStates) {
       super(Swerve.this, Auto.class);
-      moduleStates = addInput("ModuleStates", defaultModuleStates, true);
-      feedforwards = addInput("Feedforwards", defaultFeedforwards, true);
+      // moduleStates = addInput("ModuleStates", defaultModuleStates, true);
     }
 
     @Override
     public void run() {
-      var desiredStates = moduleStates.get();
-      var desiredFeedforwards = feedforwards.get();
+      // var desiredStates = moduleStates.get();
       // QuixSwerveDriveKinematics.normalizeWheelSpeeds(desiredStates, Calibration.Drive.MAX_DRIVE_VELOCITY);
-      for(QuixSwerveModule module : modules){ 
-        // module.setDesiredStateClosedLoop(desiredStates[module.getID()], desiredFeedforwards[module.getID()]);
-      }
+      
+      // for(QuixSwerveModule module : modules){ 
+      //   module.setDesiredStateClosedLoop(desiredStates[module.getID()]);
+      // }
     }
   }
 

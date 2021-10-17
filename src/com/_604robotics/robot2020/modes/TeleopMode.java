@@ -14,6 +14,7 @@ import com._604robotics.robot2020.modules.Swerve;
 import com._604robotics.robot2020.modules.Tower;
 import com._604robotics.robotnik.Coordinator;
 import com._604robotics.robotnik.Logger;
+import com._604robotics.robotnik.prefabs.auto.FalconDashboard;
 import com._604robotics.robotnik.prefabs.controller.ProfiledPIDController;
 import com._604robotics.robotnik.prefabs.flow.SmartTimer;
 import com._604robotics.robotnik.prefabs.flow.Toggle;
@@ -343,6 +344,9 @@ public class TeleopMode extends Coordinator {
           autoAngle.activate();
           break;
       }
+
+      robot.drive.updateOdometry();
+      FalconDashboard.getInstance().publishRobotPose(robot.drive.getPose());
     }
 
     private void snapTo(CardinalDirections direction) {

@@ -7,12 +7,14 @@ import static com._604robotics.robot2020.constants.Calibration.Auto.MAX_CENTRIPE
 import static com._604robotics.robot2020.constants.Calibration.Auto.MAX_SPEED_METERS_PER_SECOND;
 
 import com._604robotics.robot2020.Robot2020;
+import com._604robotics.robot2020.auto.paths.QuikPlanPreGen;
 import com._604robotics.robot2020.constants.Calibration;
 import com._604robotics.robotnik.Coordinator;
 import com._604robotics.robotnik.DashboardManager;
 import com._604robotics.robotnik.Logger;
 import com._604robotics.robotnik.Output;
 import com._604robotics.robotnik.prefabs.auto.QuikPlanReader;
+import com._604robotics.robotnik.prefabs.auto.QuikPlanSwerveReader;
 import com._604robotics.robotnik.prefabs.auto.TrajectoryCreator;
 import com._604robotics.robotnik.prefabs.auto.angular.AngularMotionConstraint;
 import com._604robotics.robotnik.prefabs.auto.angular.TurnInPlaceTrajectory;
@@ -35,7 +37,7 @@ public class AutonomousMode extends Coordinator {
   private Coordinator selectedModeMacro;
 
   private TrajectoryCreator trajectoryCreator;
-  private QuikPlanReader reader;
+  private QuikPlanSwerveReader reader;
 
   public final Output<AutonMode> autonMode;
 
@@ -62,71 +64,53 @@ public class AutonomousMode extends Coordinator {
     //         new CentripetalAccelerationConstraint(
     //             MAX_CENTRIPETAL_ACCELERATION_RADIANS_PER_SECOND_SQUARED));
 
-    // reader = new QuikPlanReader(robot.drive);
+    reader = new QuikPlanSwerveReader(robot.drive);
   }
 
   @Override
   public void begin() {
-    // System.out.println(autonMode.get());
+    System.out.println(autonMode.get());
     // robot.drive.setIdleMode(IdleMode.kCoast);
 
-    // reader.loadChosenFile();
+    reader.loadChosenFile();
 
-    // switch (autonMode.get()) {
-    //   case MANUAL:
-    //     selectedModeMacro = robot.teleopMode;
-    //     break;
-    //   case FAILSAFE_FORWARD_12:
-    //     selectedModeMacro = new FallForwardMacro();
-    //     break;
-    //   case TURN_IN_PLACE_LEFT:
-    //     selectedModeMacro = new TurnInPlaceLeft();
-    //     break;
-    //   case FAILSAFE_BACKWARD_12:
-    //     selectedModeMacro = new FallBackMacro();
-    //     break;
-    //     // case FULL_FIELD_10_BALL:
-    //     //   selectedModeMacro = new QuikPlanPreGen(robot, reader);
-    //     //   break;
-    //   case QUIX_PLAN_PREGEN:
-    //     selectedModeMacro = new QuikPlanPreGen(robot, reader);
-    //     break;
-    //   case GALATIC_SEARCH:
-    //     robot.disabledMode.livePlan.loadTrajectory();
-    //     selectedModeMacro = new QuikPlanSearch(robot, robot.disabledMode.livePlan);
-    //     break;
-    //   case OFF:
-    //   default:
-    //     selectedModeMacro = null;
-    //     break;
-    // }
+    switch (autonMode.get()) {
+      case MANUAL:
+        selectedModeMacro = robot.teleopMode;
+      case QUIX_PLAN_PREGEN:
+        selectedModeMacro = new QuikPlanPreGen(robot, reader);
+        break;
+      case OFF:
+      default:
+        selectedModeMacro = null;
+        break;
+    }
 
-    // System.out.println(selectedModeMacro);
+    System.out.println(selectedModeMacro);
     // robot.drive.disableMotorSafety();
 
-    // if (selectedModeMacro != null) {
-    //   selectedModeMacro.start();
-    // }
+    if (selectedModeMacro != null) {
+      selectedModeMacro.start();
+    }
   }
 
   @Override
   public boolean run() {
-    // robot.drive.updateOdometry();
+    robot.drive.updateOdometry();
 
-    // if (selectedModeMacro == null) {
-    //   return false;
-    // }
-    // return selectedModeMacro.execute();
-    return false;
+    if (selectedModeMacro == null) {
+      return false;
+    }
+    return selectedModeMacro.execute();
   }
 
   @Override
   public void end() {
     // robot.drive.enableMotorSafety();
     // robot.drive.setIdleMode(IdleMode.kCoast);
-    // if (selectedModeMacro != null) {
-    //   selectedModeMacro.stop();
-    // }
+    if (selectedModeMacro != null) {
+      selectedModeMacro.stop();
+    }
   }
 
   // public QuikPlanReader getReader() {

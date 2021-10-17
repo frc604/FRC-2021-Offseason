@@ -7,7 +7,6 @@ public class SwerveTrackerConstants {
     public PIDController xController;
     public PIDController yController;
     public PIDController thetaController;
-    public SimpleMotorFeedforward feedforward;
     public double maxSpeed;
     public double maxAcceleration;
 
@@ -15,13 +14,11 @@ public class SwerveTrackerConstants {
         PIDController xController,
         PIDController yController,
         PIDController thetaController,
-        SimpleMotorFeedforward feedforward,
         double maxSpeed,
         double maxAcceleration) {
     this.xController = xController;
     this.yController = yController;
     this.thetaController = thetaController;
-    this.feedforward = feedforward;
     this.maxSpeed = maxSpeed;
     this.maxAcceleration = maxAcceleration;
     }

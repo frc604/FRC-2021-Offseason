@@ -5,6 +5,7 @@ import com._604robotics.robot2020.Robot2020;
 import com._604robotics.robot2020.constants.Calibration;
 import com._604robotics.robotnik.Coordinator;
 import com._604robotics.robotnik.Logger;
+import com._604robotics.robotnik.prefabs.auto.FalconDashboard;
 import com._604robotics.robotnik.prefabs.auto.QuikPlanLive;
 import com._604robotics.robotnik.prefabs.vision.VisionCamera.GamePiece;
 import com._604robotics.robotnik.prefabs.vision.VisionManager;
@@ -56,7 +57,8 @@ public class DisabledMode extends Coordinator {
 
   @Override
   public boolean run() {
-    // robot.drive.updateOdometry();
+    robot.drive.updateOdometry();
+    FalconDashboard.getInstance().publishRobotPose(robot.drive.getPose());
 
     // // Search Gamepieces
     // if (SmartDashboard.getBoolean("Enable Searching", false)) {

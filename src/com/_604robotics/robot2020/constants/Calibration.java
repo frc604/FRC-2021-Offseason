@@ -1,10 +1,13 @@
 package com._604robotics.robot2020.constants;
 
 import com._604robotics.quixsam.mathematics.DoubleInterpolatableTreeMap;
+import com._604robotics.robotnik.prefabs.auto.SwerveTrackerConstants;
 import com._604robotics.robotnik.prefabs.auto.TrackerConstants;
 import com._604robotics.robotnik.prefabs.motorcontrol.gearing.GearRatio;
 import com._604robotics.robotnik.utils.annotations.Unreal;
+
 import edu.wpi.first.wpilibj.controller.SimpleMotorFeedforward;
+import edu.wpi.first.wpilibj.controller.PIDController;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
 import edu.wpi.first.wpilibj.util.Units;
 
@@ -84,8 +87,10 @@ public class Calibration {
     public static final double WHEEL_BASE = Units.inchesToMeters(25.5);
     public static final double WHEEL_DIAMETER = Units.inchesToMeters(4);
 
-    public static final GearRatio DRIVE_RATIO = new GearRatio(1, 6.86);
+    public static final GearRatio DRIVE_RATIO = new GearRatio(1, -6.86);
     public static final GearRatio STEERING_RATIO = new GearRatio(1, 12.8);
+
+    public static final SimpleMotorFeedforward DRIVE_FEEDFORWARD = new SimpleMotorFeedforward(0.667, 2.44, 0.27);
 
     public static final double MAX_DRIVE_VELOCITY = 4.5;
     public static final double MAX_ANGULAR_VELOCITY = 11.5;
@@ -118,13 +123,11 @@ public class Calibration {
     public static final double MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = 2; // 1.5
     public static final double MAX_CENTRIPETAL_ACCELERATION_RADIANS_PER_SECOND_SQUARED = 2; // 1.5
 
-    public static final TrackerConstants TRACKER_CONSTANTS =
-        new TrackerConstants(
-            new SimpleMotorFeedforward(
-                KS_VOLTS, KV_VOLT_SECONDS_PER_METER, KA_VOLT_SECONDS_SQUARED_PER_METER),
-            KP_DRIVE_VELCOTIY,
-            RAMSETE_B,
-            RAMSETE_ZETA,
+    public static final SwerveTrackerConstants TRACKER_CONSTANTS =
+        new SwerveTrackerConstants(
+            new PIDController(1.0, 0.0, 0.0),
+            new PIDController(1.0, 0.0, 0.0),
+            new PIDController(1.0, 0.0, 0.0),
             MAX_SPEED_METERS_PER_SECOND,
             MAX_ACCELERATION_METERS_PER_SECOND_SQUARED);
 

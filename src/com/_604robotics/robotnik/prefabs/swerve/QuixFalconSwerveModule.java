@@ -11,6 +11,7 @@ import com._604robotics.robotnik.prefabs.motorcontrol.gearing.CalculableRatio;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.sensors.SensorInitializationStrategy;
 
+import edu.wpi.first.wpilibj.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
 
 
@@ -28,13 +29,14 @@ public class QuixFalconSwerveModule extends QuixSwerveModule{
         QuixCANCoder absSteeringEncoder,
         TalonPID drivePID,
         TalonPID steeringPID,
+        SimpleMotorFeedforward driveFeedforward,
         CalculableRatio driveRatio,
         CalculableRatio steeringRatio,
         double angleOffset,
         double wheelDiameter,
         double maxDriveVelocity
     ) {
-        super(name, id, module, position, driveMotor, steeringMotor, absSteeringEncoder, driveEncoder, steeringEncoder, drivePID, steeringPID, driveRatio, steeringRatio, angleOffset, wheelDiameter, maxDriveVelocity);
+        super(name, id, module, position, driveMotor, steeringMotor, absSteeringEncoder, driveEncoder, steeringEncoder, drivePID, steeringPID, driveFeedforward, driveRatio, steeringRatio, angleOffset, wheelDiameter, maxDriveVelocity);
 
         driveMotor.controller.configIntegratedSensorInitializationStrategy(SensorInitializationStrategy.BootToZero);
         steeringMotor.controller.configIntegratedSensorInitializationStrategy(SensorInitializationStrategy.BootToZero);
@@ -53,6 +55,7 @@ public class QuixFalconSwerveModule extends QuixSwerveModule{
         boolean invertSteeringMotor,
         MotorControllerPIDConfig drivePIDConfig,
         MotorControllerPIDConfig steeringPIDConfig,
+        SimpleMotorFeedforward driveFeedforward,
         CalculableRatio driveRatio,
         CalculableRatio steeringRatio,
         double angleOffset,
@@ -76,6 +79,6 @@ public class QuixFalconSwerveModule extends QuixSwerveModule{
         TalonPID drivePID = new TalonPID(driveMotor, driveEncoder, drivePIDConfig);
         TalonPID steeringPID = new TalonPID(steeringMotor, steeringEncoder, steeringPIDConfig);
 
-        return new QuixFalconSwerveModule(name, id, module, position, driveMotor, steeringMotor, driveEncoder, steeringEncoder, absSteeringEncoder, drivePID, steeringPID, driveRatio, steeringRatio, angleOffset, wheelDiameter, maxDriveVelocity);
+        return new QuixFalconSwerveModule(name, id, module, position, driveMotor, steeringMotor, driveEncoder, steeringEncoder, absSteeringEncoder, drivePID, steeringPID, driveFeedforward, driveRatio, steeringRatio, angleOffset, wheelDiameter, maxDriveVelocity);
     }
 }
