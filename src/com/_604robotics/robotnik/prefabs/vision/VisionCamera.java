@@ -8,6 +8,8 @@ import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.geometry.Transform2d;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
 import edu.wpi.first.wpilibj.util.Units;
+import edu.wpi.first.wpiutil.math.Pair;
+
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.math3.geometry.euclidean.threed.Line;
@@ -136,16 +138,26 @@ public abstract class VisionCamera extends Module {
     private final double pitch;
     private final double area;
     private final double skew;
+    private final ArrayList<Pair<Double, Double>> corners;
 
     public Target(double yaw, double pitch, double area, double skew) {
       this.yaw = yaw;
       this.pitch = pitch;
       this.area = area;
       this.skew = skew;
+      this.corners = new ArrayList<>();
+    }
+
+    public Target(double yaw, double pitch, double area, double skew, ArrayList<Pair<Double, Double>> corners) {
+      this.yaw = yaw;
+      this.pitch = pitch;
+      this.area = area;
+      this.skew = skew;
+      this.corners = corners;
     }
 
     public Target() {
-      this(0.0, 0.0, 0.0, 0.0);
+      this(0.0, 0.0, 0.0, 0.0, new ArrayList<>());
     }
 
     /**
@@ -191,6 +203,10 @@ public abstract class VisionCamera extends Module {
      */
     public double getSkew() {
       return skew;
+    }
+
+    public ArrayList<Pair<Double, Double>> getCorners() {
+      return corners;
     }
   }
 
