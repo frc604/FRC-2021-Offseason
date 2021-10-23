@@ -345,7 +345,7 @@ public class TeleopMode extends Coordinator {
           break;
       }
 
-      robot.drive.updateOdometry();
+      robot.drive.updateOdometryWithVision(robot.limelight.getLatestMeasurement());
       FalconDashboard.getInstance().publishRobotPose(robot.drive.getPose());
     }
 

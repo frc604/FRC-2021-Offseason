@@ -4,6 +4,9 @@
 
 package com._604robotics.quixsam.odometry;
 
+import com._604robotics.robotnik.prefabs.swerve.QuixSwerveDriveKinematics;
+import com._604robotics.robotnik.prefabs.swerve.QuixSwerveModuleState;
+
 import edu.wpi.first.math.MathSharedStore;
 import edu.wpi.first.math.MathUsageId;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
@@ -21,8 +24,8 @@ import edu.wpi.first.wpiutil.WPIUtilJNI;
  * <p>Teams can use odometry during the autonomous period for complex tasks like path following.
  * Furthermore, odometry can be used for latency compensation when using computer-vision systems.
  */
-public class QuixSwerveDriveOdometry {
-  private final SwerveDriveKinematics m_kinematics;
+public class QuixsamSwerveDriveOdometry {
+  private final QuixSwerveDriveKinematics m_kinematics;
   private Pose2d m_poseMeters;
   private double m_prevTimeSeconds = -1;
 
@@ -36,8 +39,8 @@ public class QuixSwerveDriveOdometry {
    * @param gyroAngle The angle reported by the gyroscope.
    * @param initialPose The starting position of the robot on the field.
    */
-  public QuixSwerveDriveOdometry(
-      SwerveDriveKinematics kinematics, Rotation2d gyroAngle, Pose2d initialPose) {
+  public QuixsamSwerveDriveOdometry(
+      QuixSwerveDriveKinematics kinematics, Rotation2d gyroAngle, Pose2d initialPose) {
     m_kinematics = kinematics;
     m_poseMeters = initialPose;
     m_gyroOffset = m_poseMeters.getRotation().minus(gyroAngle);
@@ -51,7 +54,7 @@ public class QuixSwerveDriveOdometry {
    * @param kinematics The swerve drive kinematics for your drivetrain.
    * @param gyroAngle The angle reported by the gyroscope.
    */
-  public QuixSwerveDriveOdometry(SwerveDriveKinematics kinematics, Rotation2d gyroAngle) {
+  public QuixsamSwerveDriveOdometry(QuixSwerveDriveKinematics kinematics, Rotation2d gyroAngle) {
     this(kinematics, gyroAngle, new Pose2d());
   }
 
@@ -80,7 +83,7 @@ public class QuixSwerveDriveOdometry {
   }
 
   public Pose2d updateWithTime(
-     double prevTimeSeconds, double currentTimeSeconds, Rotation2d gyroAngle, SwerveModuleState... moduleStates) {
+     double prevTimeSeconds, double currentTimeSeconds, Rotation2d gyroAngle, QuixSwerveModuleState... moduleStates) {
     double period = prevTimeSeconds >= 0 ? currentTimeSeconds - prevTimeSeconds : 0.0;
     m_prevTimeSeconds = currentTimeSeconds;
 
@@ -114,7 +117,7 @@ public class QuixSwerveDriveOdometry {
    * @return The new pose of the robot.
    */
   public Pose2d updateWithTime(
-      double currentTimeSeconds, Rotation2d gyroAngle, SwerveModuleState... moduleStates) {
+      double currentTimeSeconds, Rotation2d gyroAngle, QuixSwerveModuleState... moduleStates) {
     double period = m_prevTimeSeconds >= 0 ? currentTimeSeconds - m_prevTimeSeconds : 0.0;
     m_prevTimeSeconds = currentTimeSeconds;
 
@@ -146,7 +149,7 @@ public class QuixSwerveDriveOdometry {
    *     same order in which you instantiated your SwerveDriveKinematics.
    * @return The new pose of the robot.
    */
-  public Pose2d update(Rotation2d gyroAngle, SwerveModuleState... moduleStates) {
+  public Pose2d update(Rotation2d gyroAngle, QuixSwerveModuleState... moduleStates) {
     return updateWithTime(WPIUtilJNI.now() * 1.0e-6, gyroAngle, moduleStates);
   }
 }

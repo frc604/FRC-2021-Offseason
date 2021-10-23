@@ -1,11 +1,13 @@
 package com._604robotics.quixsam.odometry;
 
+import com._604robotics.robotnik.prefabs.swerve.QuixSwerveModuleState;
+
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.kinematics.SwerveModuleState;
 
 public class SwerveDriveOdometryMeasurement {
   private final Rotation2d gyroAngle;
-  private final SwerveModuleState[] moduleStates;
+  private final QuixSwerveModuleState[] moduleStates;
 
   private final double sigmaX;
   private final double sigmaY;
@@ -16,7 +18,7 @@ public class SwerveDriveOdometryMeasurement {
       double sigmaX,
       double sigmaY,
       Rotation2d sigmaTheta,
-      SwerveModuleState... moduleStates) {
+      QuixSwerveModuleState... moduleStates) {
     this.gyroAngle = gyroAngle;
     this.moduleStates = moduleStates;
     this.sigmaX = sigmaX;
@@ -28,7 +30,7 @@ public class SwerveDriveOdometryMeasurement {
     return gyroAngle;
   }
 
-  public SwerveModuleState[] getModuleStates() {
+  public QuixSwerveModuleState[] getModuleStates() {
     return moduleStates;
   }
 

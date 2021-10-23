@@ -30,10 +30,10 @@ public class QuixsamNetworkTable {
         prioriTable = quixsamTable.getSubTable("priori");
         estimatesTable = quixsamTable.getSubTable("estimates");
 
-        estimatesTable.addEntryListener((table, key, entry, value, flags) -> {
-            estimateListener.accept(new QuixsamEsimate((int) value.getDoubleArray()[0], new Pose2d(value.getDoubleArray()[1], value.getDoubleArray()[2], new Rotation2d(value.getDoubleArray()[3]))));
-            estimatesTable.delete(key);
-        }, EntryListenerFlags.kNew);
+        // estimatesTable.addEntryListener((table, key, entry, value, flags) -> {
+        //     estimateListener.accept(new QuixsamEsimate((int) value.getDoubleArray()[0], new Pose2d(value.getDoubleArray()[1], value.getDoubleArray()[2], new Rotation2d(value.getDoubleArray()[3]))));
+        //     estimatesTable.delete(key);
+        // }, EntryListenerFlags.kNew);
 
         Double[] prioriData = new Double[]{(double) 
             0,
@@ -76,12 +76,13 @@ public class QuixsamNetworkTable {
     }
 
     public void publishVision(SendableVisionMeasurment measurment) {
-        Double[] visionData = new Double[]{(double) measurment.getId()};
+        Double[] visionData = new Double[17];
+        visionData[0] = (double) measurment.getId();
         for (int i = 0; i < measurment.getMeasurments().size(); i++) {
-            visionData[i + 1] = measurment.getMeasurments().get(i).getFirst(); // bearing
-            visionData[i + 2] = measurment.getMeasurments().get(i).getSecond(); // elevation
-            visionData[i + 3] = measurment.getSigmas().get(i).getFirst(); // bearing sigma
-            visionData[i + 4] = measurment.getSigmas().get(i).getSecond(); // elevation sigma
+            visionData[4*i + 1] = measurment.getMeasurments().get(i).getFirst(); // bearing
+            visionData[4*i + 2] = measurment.getMeasurments().get(i).getSecond(); // elevation
+            visionData[4*i + 3] = measurment.getSigmas().get(i).getFirst(); // bearing sigma
+            visionData[4*i + 4] = measurment.getSigmas().get(i).getSecond(); // elevation sigma
         }
 
         visionTable.getEntry(String.valueOf(measurment.getId())).setNumberArray(visionData);

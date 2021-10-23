@@ -1,5 +1,7 @@
 package com._604robotics.robot2020.modules;
 
+import com._604robotics.quixsam.QuixsamSwerveLocalizer;
+import com._604robotics.quixsam.odometry.SwerveDriveOdometryMeasurement;
 import com._604robotics.robot2020.constants.Calibration;
 import com._604robotics.robot2020.constants.Ports;
 import com._604robotics.robotnik.Action;
@@ -13,6 +15,7 @@ import com._604robotics.robotnik.prefabs.swerve.QuixSwerveDriveKinematics;
 import com._604robotics.robotnik.prefabs.swerve.QuixSwerveDriveOdometry;
 import com._604robotics.robotnik.prefabs.swerve.QuixSwerveModule;
 import com._604robotics.robotnik.prefabs.swerve.QuixSwerveModuleState;
+import com._604robotics.robotnik.prefabs.vision.VisionCamera;
 
 import edu.wpi.first.wpilibj.AnalogGyro;
 import edu.wpi.first.wpilibj.BuiltInAccelerometer;
@@ -131,6 +134,14 @@ public class Swerve extends Module {
     new Pose2d(Units.feetToMeters(0), Units.feetToMeters(0), Rotation2d.fromDegrees(0))
   );
 
+  public QuixsamSwerveLocalizer quixsam = new QuixsamSwerveLocalizer(
+    "quixsam",
+    kinematics,
+    new Pose2d(Units.feetToMeters(0), Units.feetToMeters(0), Rotation2d.fromDegrees(0)),
+    new Pose2d(Units.feetToMeters(0), Units.feetToMeters(0), Rotation2d.fromDegrees(0)),
+    getHeading()
+  );
+
   /* Outputs */
   private final BuiltInAccelerometer accel = new BuiltInAccelerometer();
   public final Output<Double> xAccel = addOutput("X accel", accel::getX);
@@ -204,6 +215,28 @@ public class Swerve extends Module {
 
   public void updateOdometry() {
     odometry.update(getHeading(), getModuleStates());
+    
+    SwerveDriveOdometryMeasurement odometryMeasrument = new SwerveDriveOdometryMeasurement(
+      getHeading(),
+      0.1, 0.1, new Rotation2d(0.1),
+      getModuleStates()
+    );
+
+    quixsam.update(odometryMeasrument);
+    quixsam.periodic();
+  }
+
+  public void updateOdometryWithVision(VisionCamera.PipelineVisionPacket vision) {
+    odometry.update(getHeading(), getModuleStates());
+    
+    SwerveDriveOdometryMeasurement odometryMeasrument = new SwerveDriveOdometryMeasurement(
+      getHeading(),
+      0.1, 0.1, new Rotation2d(0.1),
+      getModuleStates()
+    );
+
+    quixsam.update(odometryMeasrument);
+    quixsam.periodic();
   }
 
   public void zeroOdometry(Pose2d pose) {

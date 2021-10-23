@@ -1,42 +1,47 @@
 package com._604robotics.quixsam;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.NavigableSet;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentSkipListMap;
 
 import com._604robotics.quixsam.mathematics.DoubleInterpolatableTreeMap;
 import com._604robotics.quixsam.mathematics.Interpolatable;
-import com._604robotics.quixsam.odometry.QuixSwerveDriveOdometry;
+import com._604robotics.quixsam.odometry.QuixsamSwerveDriveOdometry;
 import com._604robotics.quixsam.odometry.SendableOdometryMeasurment;
 import com._604robotics.quixsam.vision.SendableVisionMeasurment;
 import com._604robotics.quixsam.odometry.SwerveDriveOdometryMeasurement;
+import com._604robotics.robotnik.prefabs.swerve.QuixSwerveDriveKinematics;
 import com._604robotics.robotnik.prefabs.vision.VisionCamera;
 import com._604robotics.robotnik.prefabs.vision.VisionCamera.Target;
 
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.wpiutil.math.Pair;
 
 public class QuixsamSwerveLocalizer {
     private int currentID = 0;
-    private HashMap<Integer, Double> idMap;
+    private HashMap<Integer, Double> idMap = new HashMap<>();
 
-    private TreeMap<Double, SwerveDriveOdometryMeasurement> odometryMap;
+    private TreeMap<Double, SwerveDriveOdometryMeasurement> odometryMap = new TreeMap<>();
     private DoubleInterpolatableTreeMap<Pose2d> poseMap = new DoubleInterpolatableTreeMap<>();
 
-    private TreeMap<Double, Pair<SendableOdometryMeasurment, SendableVisionMeasurment>> buffer;
+    private TreeMap<Double, Pair<SendableOdometryMeasurment, SendableVisionMeasurment>> buffer = new TreeMap<>();
 
-    private QuixSwerveDriveOdometry rawOdometry;
-    private QuixSwerveDriveOdometry playbackOdometry;
+    private QuixsamSwerveDriveOdometry rawOdometry;
+    private QuixsamSwerveDriveOdometry playbackOdometry;
 
     private QuixsamNetworkTable networkTable;
 
-    private double timeTreshold = 0.1; // seconds
+    private double timeTreshold = 0.2; // seconds
 
-    public QuixsamSwerveLocalizer(String name, SwerveDriveKinematics kinematics, Pose2d priori, Pose2d prioriSigma, Rotation2d initialGyroAngle) {
-        rawOdometry = new QuixSwerveDriveOdometry(kinematics, initialGyroAngle, priori);
-        playbackOdometry = new QuixSwerveDriveOdometry(kinematics, initialGyroAngle, priori);
+    public QuixsamSwerveLocalizer(String name, QuixSwerveDriveKinematics kinematics, Pose2d priori, Pose2d prioriSigma, Rotation2d initialGyroAngle) {
+        rawOdometry = new QuixsamSwerveDriveOdometry(kinematics, initialGyroAngle, priori);
+        playbackOdometry = new QuixsamSwerveDriveOdometry(kinematics, initialGyroAngle, priori);
 
         networkTable = new QuixsamNetworkTable(name, priori, prioriSigma, this::computeEstimate);
     }
@@ -113,8 +118,9 @@ public class QuixsamSwerveLocalizer {
 
     public void periodic() {
         double currentTime = Timer.getFPGATimestamp();
-        
-        for (double key : buffer.keySet()) {
+
+        ArrayList<Double> keys = new ArrayList<>(buffer.keySet());
+        for (double key : keys) {
             if (currentTime - key > timeTreshold) {
                 networkTable.publishOdometry(buffer.get(key).getFirst());
                 if (buffer.get(key).getSecond() != null) {

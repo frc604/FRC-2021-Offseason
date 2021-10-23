@@ -6,6 +6,7 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.util.Units;
 import edu.wpi.first.wpiutil.math.Pair;
 
 public class Limelight extends VisionCamera {
@@ -18,7 +19,7 @@ public class Limelight extends VisionCamera {
 
   @Override
   public PipelineVisionPacket getLatestMeasurement() {
-    boolean hasTargets = (int) limelightTable.getEntry("tv").getNumber(0) == 1;
+    boolean hasTargets = limelightTable.getEntry("tv").getNumber(0).intValue() == 1;
 
     if (hasTargets) {
       double yaw = limelightTable.getEntry("tx").getDouble(0);
@@ -27,12 +28,19 @@ public class Limelight extends VisionCamera {
       double skew = limelightTable.getEntry("ts").getDouble(0);
       double latency = limelightTable.getEntry("tl").getDouble(0) + 11; // Magic number from LL website.
 
-      double[] cornersX = limelightTable.getEntry("tcornx").getDoubleArray(new double[0]);
-      double[] cornersY = limelightTable.getEntry("tcorny").getDoubleArray(new double[0]);
+      double[] cornersLimelight = limelightTable.getEntry("tcornxy").getDoubleArray(new double[0]);
 
       ArrayList<Pair<Double, Double>> corners = new ArrayList<>();
-      for (int i = 0; i < cornersX.length; i++) {
-        corners.add(new Pair<Double,Double>(cornersX[i], cornersY[i]));
+      for (int i = 0; i < cornersLimelight.length; i+=2) {
+        corners.add(new Pair<>(cornersLimelight[i], cornersLimelight[i+1]));
+      }
+
+      for (int i = 0; i < corners.size(); i++) {
+        corners.set(i, llxyBE(corners.get(i).getFirst(), corners.get(i).getSecond()));
+      }
+
+      for (int i = 0; i < corners.size(); i++) {
+        corners.set(i, new Pair<>(Units.degreesToRadians(corners.get(i).getFirst()), Units.degreesToRadians(corners.get(i).getSecond())));
       }
 
       Target target = new Target(yaw, pitch, area, skew, corners);
@@ -47,5 +55,24 @@ public class Limelight extends VisionCamera {
     } else {
       return new PipelineVisionPacket(false, new Target(), new ArrayList<Target>(), 0.0);
     }
+  }
+
+  public static Pair<Double, Double> llxyBE(double x, double y) {
+    double resolutionWidth = 320;
+    double resolutionHeight = 240;
+
+    double fovWidth = 59.6;
+    double fovHeight = 49.7;
+
+    double centerX = resolutionWidth / 2;
+    double centerY = resolutionHeight / 2;
+
+    double degPerPWidth = fovWidth / resolutionWidth;
+    double defPerPHeight = fovHeight / resolutionHeight;
+
+    double bearing = -(x - centerX) * degPerPWidth;
+    double elevation = ((resolutionHeight - y) - centerY) * defPerPHeight;
+
+    return new Pair<>(bearing, elevation);
   }
 }

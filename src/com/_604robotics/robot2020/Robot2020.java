@@ -7,6 +7,7 @@ import com._604robotics.robotnik.DashboardManager;
 import com._604robotics.robotnik.Robot;
 import com._604robotics.robotnik.prefabs.modules.Shifter;
 import com._604robotics.robotnik.prefabs.motorcontrol.PowerMonitor;
+import com._604robotics.robotnik.prefabs.vision.Limelight;
 import com._604robotics.robotnik.prefabs.vision.PhotonVisionCamera;
 import com._604robotics.robotnik.prefabs.vision.VisionManager;
 import edu.wpi.first.wpilibj.RobotBase;
@@ -37,6 +38,12 @@ public class Robot2020 extends Robot {
   public final Shooter shooter = addModule(new Shooter());
 
   public final Swerve drive = addModule(new Swerve());
+
+  public final Limelight limelight = addModule(new Limelight(
+    "limelight",
+    new Vector3D(0, 0, 0),
+    20
+  ));
 
   public final DisabledMode disabledMode = setDisabledMode(new DisabledMode(this));
   public final TeleopMode teleopMode = setTeleopMode(new TeleopMode(this));
