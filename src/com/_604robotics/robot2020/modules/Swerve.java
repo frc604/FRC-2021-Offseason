@@ -195,7 +195,7 @@ public class Swerve extends Module {
   }
 
   public void driveClosedLoop(QuixSwerveModuleState[] desiredStates) {
-    QuixSwerveDriveKinematics.normalizeWheelSpeeds(desiredStates, Calibration.Drive.MAX_DRIVE_VELOCITY);
+    // QuixSwerveDriveKinematics.normalizeWheelSpeeds(desiredStates, Calibration.Drive.MAX_DRIVE_VELOCITY);
     
     for(QuixSwerveModule module : modules){ 
       module.setDesiredStateClosedLoop(desiredStates[module.getID()]);
@@ -219,7 +219,7 @@ public class Swerve extends Module {
     QuixSwerveDriveKinematics.normalizeWheelSpeeds(desiredStates, Calibration.Drive.MAX_DRIVE_VELOCITY);
     
     for(QuixSwerveModule module : modules){
-      module.setDesiredStateClosedLoop(desiredStates[module.getID()]);
+      module.setDesiredStateOpenLoop(desiredStates[module.getID()]);
     }
   }  
   

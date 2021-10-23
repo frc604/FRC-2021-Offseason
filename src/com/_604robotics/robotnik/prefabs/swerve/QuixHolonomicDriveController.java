@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj.controller.PIDController;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
  * This holonomic drive controller can be used to follow trajectories using a holonomic drivetrain
@@ -83,8 +84,8 @@ public class QuixHolonomicDriveController {
   public ChassisSpeeds calculate(
       Pose2d currentPose, Pose2d poseRef, double xVelocityRefMeters, double yVelocityRefMeters, double angularVelocityRefRadians) {
     // Calculate feedforward velocities (field-relative).
-    double xFF = xVelocityRefMeters * poseRef.getRotation().getCos();
-    double yFF = yVelocityRefMeters * poseRef.getRotation().getSin();
+    double xFF = xVelocityRefMeters;
+    double yFF = yVelocityRefMeters;
     double thetaFF = angularVelocityRefRadians;
 
     m_poseError = poseRef.relativeTo(currentPose);

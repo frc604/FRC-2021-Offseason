@@ -78,7 +78,7 @@ public class QuixPlanSwerveTrackingCoordinator extends Coordinator {
           new Rotation2d(state.get(TrajectoryState.Theta.index))
         ),
         state.get(TrajectoryState.dx.index),
-        state.get(TrajectoryState.dx.index),
+        state.get(TrajectoryState.dy.index),
         state.get(TrajectoryState.dTheta.index)
       );
 

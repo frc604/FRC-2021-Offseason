@@ -90,7 +90,7 @@ public class Calibration {
     public static final GearRatio DRIVE_RATIO = new GearRatio(1, -6.86);
     public static final GearRatio STEERING_RATIO = new GearRatio(1, 12.8);
 
-    public static final SimpleMotorFeedforward DRIVE_FEEDFORWARD = new SimpleMotorFeedforward(0.667, 2.44, 0.27);
+    public static final SimpleMotorFeedforward DRIVE_FEEDFORWARD = new SimpleMotorFeedforward(0.15, 2.44, 0.27);
 
     public static final double MAX_DRIVE_VELOCITY = 4.5;
     public static final double MAX_ANGULAR_VELOCITY = 11.5;

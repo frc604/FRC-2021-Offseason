@@ -261,9 +261,9 @@ public class TeleopMode extends Coordinator {
     }
 
     public void run() {
-      double leftX = -driver.leftStick.x.get();
-      double leftY = -driver.leftStick.y.get();
-      double rightX = driver.rightStick.x.get();
+      double leftX = driver.leftStick.x.get();
+      double leftY = driver.leftStick.y.get();
+      double rightX = -driver.rightStick.x.get();
 
       if (driverLeftJoystickButton) {
         leftX *= 0.8;

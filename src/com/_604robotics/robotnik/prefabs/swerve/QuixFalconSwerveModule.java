@@ -40,6 +40,8 @@ public class QuixFalconSwerveModule extends QuixSwerveModule{
 
         driveMotor.controller.configIntegratedSensorInitializationStrategy(SensorInitializationStrategy.BootToZero);
         steeringMotor.controller.configIntegratedSensorInitializationStrategy(SensorInitializationStrategy.BootToZero);
+
+        driveMotor.setInverted(true);
     }
 
 
