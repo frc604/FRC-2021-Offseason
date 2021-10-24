@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj.controller.SimpleMotorFeedforward;
 public class QuixPlanSwerveTrajectoryTracker extends QuixPlanSwerveTrackingCoordinator {
     private final Swerve.Auto auto;
     private final Swerve swerve;
+    
 
     public QuixPlanSwerveTrajectoryTracker(QuikPlanSwerveReader reader, Swerve swerve, SwerveTrackerConstants constants) {
         super(reader, swerve, constants);

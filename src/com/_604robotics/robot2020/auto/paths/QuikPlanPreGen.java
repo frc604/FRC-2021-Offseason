@@ -25,9 +25,9 @@ public class QuikPlanPreGen extends StatefulCoordinator {
       "SOTF",
       new ParallelRaceCoordinator(
           "SOTF1",
-          tracker
-          // new ShooterControlMacro(robot.shooter),
-          // new FeedOTFMacro(robot.intake, robot.intakeDeploy, robot.revolver, robot.tower, robot.antiJamRoller, () -> tracker.doShoot())
+          tracker,
+          new ShooterControlMacro(robot.shooter),
+          new FeedOTFMacro(robot.intake, robot.intakeDeploy, robot.revolver, robot.tower, robot.antiJamRoller, () -> tracker.doShoot())
       )
     );
     addState("FINISH", new CombinedFeedMacro(robot).withTimeout(5));

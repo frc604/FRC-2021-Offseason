@@ -9,6 +9,8 @@ import com._604robotics.robot2020.modules.Revolver;
 import com._604robotics.robot2020.modules.Tower;
 import com._604robotics.robotnik.Coordinator;
 
+import edu.wpi.first.wpilibj.Timer;
+
 
 public class FeedOTFMacro extends Coordinator {
   private Revolver.Empty revolverEmpty;
@@ -19,6 +21,8 @@ public class FeedOTFMacro extends Coordinator {
   private IntakeDeploy.Deploy deploy;
 
   private BooleanSupplier doShoot;
+
+  private final Timer timer = new Timer();
 
   public FeedOTFMacro(
     Intake intake,
@@ -36,8 +40,14 @@ public class FeedOTFMacro extends Coordinator {
   }
 
   @Override
+  public void begin() {
+    timer.reset();
+    timer.start();
+  }
+
+  @Override
   public boolean run() {
-    if (doShoot.getAsBoolean()) {
+    if (doShoot.getAsBoolean() && timer.hasElapsed(2)) {
       revolverEmpty.activate();
       towerEmpty.activate();
       roller.activate();

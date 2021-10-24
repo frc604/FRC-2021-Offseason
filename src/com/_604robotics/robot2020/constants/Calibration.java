@@ -32,7 +32,7 @@ public class Calibration {
   /* Revolver Calibration */
   public static final class Revolver {
     // public static final double EMPTY_SPEED = 0.75;
-    public static final double EMPTY_SPEED = 0.75;
+    public static final double EMPTY_SPEED = 0.4;
     public static final double INTAKE_SPEED = 0.5;
     public static final double REVERSE_SPEED = -0.5;
   }
@@ -45,7 +45,7 @@ public class Calibration {
 
   /* Intake Calibration */
   public static final class Intake {
-    public static final double INTAKE_SPEED = 0.75;
+    public static final double INTAKE_SPEED = 1.0;
     public static final double REVERSE_SPEED = -0.5;
   }
 
@@ -125,9 +125,9 @@ public class Calibration {
 
     public static final SwerveTrackerConstants TRACKER_CONSTANTS =
         new SwerveTrackerConstants(
-            new PIDController(6.0, 0.0, 0.1),
-            new PIDController(6.0, 0.0, 0.1),
-            new PIDController(5.0, 0.0, 0.0),
+            new PIDController(5.0, 0.0, 0.1),
+            new PIDController(5.0, 0.0, 0.1),
+            new PIDController(2.0, 0.0, 0.0),
             MAX_SPEED_METERS_PER_SECOND,
             MAX_ACCELERATION_METERS_PER_SECOND_SQUARED);
 

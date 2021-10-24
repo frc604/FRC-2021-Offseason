@@ -147,24 +147,24 @@ public class Swerve extends Module {
 
   /* Outputs */
   private final BuiltInAccelerometer accel = new BuiltInAccelerometer();
-  public final Output<Double> xAccel = addOutput("X accel", accel::getX);
-  public final Output<Double> yAccel = addOutput("Y accel", accel::getY);
-  public final Output<Double> zAccel = addOutput("Z accel", accel::getZ);
+  // public final Output<Double> xAccel = addOutput("X accel", accel::getX);
+  // public final Output<Double> yAccel = addOutput("Y accel", accel::getY);
+  // public final Output<Double> zAccel = addOutput("Z accel", accel::getZ);
 
-  public final Output<Double> imuXAccel = addOutput("IMU X accel", imu::getXAccel);
-  public final Output<Double> imuYAccel = addOutput("IMU Y accel", imu::getYAccel);
+  // public final Output<Double> imuXAccel = addOutput("IMU X accel", imu::getXAccel);
+  // public final Output<Double> imuYAccel = addOutput("IMU Y accel", imu::getYAccel);
 
   public final Output<Double> gyroAngle = addOutput("gyroAngle", imu::getAngle);
 
-  public final Output<Double> frontLeftAngle = addOutput("Front Left Angle", frontLeft::getAngle);
-  public final Output<Double> frontRightAngle = addOutput("Front Right Angle", frontRight::getAngle);
-  public final Output<Double> rearLeftAngle = addOutput("Rear Left Angle", rearLeft::getAngle);
-  public final Output<Double> rearRightAngle = addOutput("Rear Right Angle", rearRight::getAngle);
+  // public final Output<Double> frontLeftAngle = addOutput("Front Left Angle", frontLeft::getAngle);
+  // public final Output<Double> frontRightAngle = addOutput("Front Right Angle", frontRight::getAngle);
+  // public final Output<Double> rearLeftAngle = addOutput("Rear Left Angle", rearLeft::getAngle);
+  // public final Output<Double> rearRightAngle = addOutput("Rear Right Angle", rearRight::getAngle);
 
-  public final Output<Double> absfrontLeftAngle = addOutput("Abs Front Left Angle", frontLeft::getAbsEncoderAngle);
-  public final Output<Double> absfrontRightAngle = addOutput("Abs Front Right Angle", frontRight::getAbsEncoderAngle);
-  public final Output<Double> absrearLeftAngle = addOutput("Abs Rear Left Angle", rearLeft::getAbsEncoderAngle);
-  public final Output<Double> absrearRightAngle = addOutput("Abs Rear Right Angle", rearRight::getAbsEncoderAngle);
+  // public final Output<Double> absfrontLeftAngle = addOutput("Abs Front Left Angle", frontLeft::getAbsEncoderAngle);
+  // public final Output<Double> absfrontRightAngle = addOutput("Abs Front Right Angle", frontRight::getAbsEncoderAngle);
+  // public final Output<Double> absrearLeftAngle = addOutput("Abs Rear Left Angle", rearLeft::getAbsEncoderAngle);
+  // public final Output<Double> absrearRightAngle = addOutput("Abs Rear Right Angle", rearRight::getAbsEncoderAngle);
 
   public final Output<Double> robotHeading = addOutput("Robot Heading", this::getHeadingDegrees);
   public final Output<Double> robotX = addOutput("Robot X Position", this::getX);
@@ -218,28 +218,10 @@ public class Swerve extends Module {
 
   public void updateOdometry() {
     odometry.update(getHeading(), getModuleStates());
-    
-    SwerveDriveOdometryMeasurement odometryMeasrument = new SwerveDriveOdometryMeasurement(
-      getHeading(),
-      0.1, 0.1, new Rotation2d(0.1),
-      getModuleStates()
-    );
-
-    quixsam.update(odometryMeasrument);
-    quixsam.periodic();
   }
 
   public void updateOdometryWithVision(VisionCamera.PipelineVisionPacket vision) {
     odometry.update(getHeading(), getModuleStates());
-    
-    SwerveDriveOdometryMeasurement odometryMeasrument = new SwerveDriveOdometryMeasurement(
-      getHeading(),
-      0.1, 0.1, new Rotation2d(0.1),
-      getModuleStates()
-    );
-
-    quixsam.update(odometryMeasrument, vision);
-    quixsam.periodic();
   }
 
   public void zeroOdometry(Pose2d pose) {
@@ -254,10 +236,6 @@ public class Swerve extends Module {
   public void setModuleStates(boolean openLoop, QuixSwerveModuleState... desiredStates) {
     QuixSwerveDriveKinematics.normalizeWheelSpeeds(desiredStates, Calibration.Drive.MAX_DRIVE_VELOCITY);
 
-    SmartDashboard.putNumber("DriveVel", frontLeft.getState().speedMetersPerSecond);
-    SmartDashboard.putNumber("DriveSetpoint", desiredStates[0].speedMetersPerSecond);
-
-    
     for(QuixSwerveModule module : modules){
       module.setDesiredStateOpenLoop(desiredStates[module.getID()]);
     }

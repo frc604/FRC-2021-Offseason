@@ -5,6 +5,8 @@ import com._604robotics.robotnik.utils.Pair;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.livewindow.LiveWindow;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -35,6 +37,7 @@ public class Robot extends TimedRobot {
 
   public Robot() {
     updateModuleList();
+    LiveWindow.disableAllTelemetry();
   }
 
   protected <T extends Module> T addModule(T module) {

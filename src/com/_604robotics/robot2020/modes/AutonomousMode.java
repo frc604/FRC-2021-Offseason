@@ -36,8 +36,7 @@ public class AutonomousMode extends Coordinator {
 
   private Coordinator selectedModeMacro;
 
-  private TrajectoryCreator trajectoryCreator;
-  private QuikPlanSwerveReader reader;
+  public QuikPlanSwerveReader reader;
 
   public final Output<AutonMode> autonMode;
 
@@ -70,9 +69,6 @@ public class AutonomousMode extends Coordinator {
   @Override
   public void begin() {
     System.out.println(autonMode.get());
-    // robot.drive.setIdleMode(IdleMode.kCoast);
-
-    reader.loadChosenFile();
 
     switch (autonMode.get()) {
       case MANUAL:

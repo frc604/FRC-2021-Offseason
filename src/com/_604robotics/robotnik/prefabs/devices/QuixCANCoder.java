@@ -5,10 +5,7 @@ import com.ctre.phoenix.sensors.AbsoluteSensorRange;
 import com.ctre.phoenix.sensors.CANCoder;
 import com.ctre.phoenix.sensors.SensorInitializationStrategy;
 
-import edu.wpi.first.wpilibj.Sendable;
-import edu.wpi.first.wpilibj.smartdashboard.SendableBuilder;
-
-public class QuixCANCoder implements BetterAbsoluteEncoder, Sendable{
+public class QuixCANCoder implements BetterAbsoluteEncoder {
     public CANCoder encoder;
     private String name;
 
@@ -76,11 +73,5 @@ public class QuixCANCoder implements BetterAbsoluteEncoder, Sendable{
     @Override
     public void zeroToAbsPosition() {
         encoder.setPositionToAbsolute();
-    }
-
-    @Override
-    public void initSendable(SendableBuilder builder) {
-        builder.setSmartDashboardType("Gyro");
-        builder.addDoubleProperty(name, this::getAbsPosition, null);
     }
 }
