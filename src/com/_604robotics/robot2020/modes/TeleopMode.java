@@ -248,10 +248,10 @@ public class TeleopMode extends Coordinator {
       autoAngle = robot.drive.new AutoAngle();
 
       snappingController = new ProfiledPIDController(
-        0.05, 0.0, 0.0,
-        new TrapezoidProfile.Constraints(360.0, 270.0),
+        0.075, 0.0, 0.0,
+        new TrapezoidProfile.Constraints(720.0, 360.0),
         robot.drive::getRawHeadingDegrees,
-        (value) -> autoAngle.desiredAngularVel.set(-value)
+        (value) -> autoAngle.desiredAngularVel.set(value)
       );
 
       snappingController.setOutputRange(-1000, 1000);
@@ -369,11 +369,17 @@ public class TeleopMode extends Coordinator {
       SmartDashboard.putNumber("Error", snappingController.getPositionError());
       SmartDashboard.putNumber("Output", snappingController.getGoal().position);
 
-      snappingController.setGoal(placeInScope(robot.drive.getRawHeadingDegrees(), snapAngle.getDegrees()));
+      double setpoint = -robot.limelight.getLatestMeasurement().getBestTarget().getYaw() + robot.drive.getRawHeadingDegrees();
+
+      // System.out.println("Setpoint:" + -robot.limelight.getLatestMeasurement().getBestTarget().getYaw());
+      // System.out.println("Current:" + robot.drive.getRawHeadingDegrees());
+
+      snappingController.setGoal(setpoint);
 
       if (!isSnapping) {
-        snappingController.setInitialState(new TrapezoidProfile.State(robot.drive.getHeadingDegrees(), robot.drive.getAngularVelDegrees()));
+        snappingController.setInitialState(new TrapezoidProfile.State(robot.drive.getRawHeadingDegrees(), robot.drive.getAngularVelDegrees()));
         snappingController.enable();
+
         isSnapping = true;
       }
 
