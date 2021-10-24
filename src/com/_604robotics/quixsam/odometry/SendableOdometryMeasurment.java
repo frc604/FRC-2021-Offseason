@@ -17,6 +17,10 @@ public class SendableOdometryMeasurment {
         return id;
     }
 
+    public void setId(int id) {
+        this.id = id;
+    }
+
     public Pose2d getPose() {
         return pose;
     }

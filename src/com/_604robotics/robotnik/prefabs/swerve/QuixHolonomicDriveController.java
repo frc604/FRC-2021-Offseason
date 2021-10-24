@@ -94,6 +94,11 @@ public class QuixHolonomicDriveController {
       return ChassisSpeeds.fromFieldRelativeSpeeds(xFF, yFF, thetaFF, currentPose.getRotation());
     }
 
+
+    SmartDashboard.putNumber("X Error", m_poseError.getX());
+    SmartDashboard.putNumber("Y Error", m_poseError.getY());
+    SmartDashboard.putNumber("Theta Error", m_poseError.getRotation().getRadians());
+
     // Calculate feedback velocities (based on position error).
     double xFeedback = m_xController.calculate(currentPose.getX(), poseRef.getX());
     double yFeedback = m_yController.calculate(currentPose.getY(), poseRef.getY());

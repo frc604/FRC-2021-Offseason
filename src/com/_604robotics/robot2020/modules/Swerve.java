@@ -23,10 +23,13 @@ import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
 import edu.wpi.first.wpilibj.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Units;
 
 public class Swerve extends Module {
   /* Modules */
+  private final MotorControllerPIDConfig turningPID = new MotorControllerPIDConfig(0.1, 0.0, 0.0);
+
   private final QuixFalconSwerveModule frontLeft = QuixFalconSwerveModule.createModule(
     "Front Left",
     0,
@@ -37,8 +40,8 @@ public class Swerve extends Module {
     Ports.MODULE_0_ABS_ENCODER,
     false,
     false,
-    new MotorControllerPIDConfig(0.001, 0.0, 0.0),
-    new MotorControllerPIDConfig(0.6, 0.0, 12.0),
+    new MotorControllerPIDConfig(0.15, 0.0, 0.0),
+    turningPID,
     Calibration.Drive.DRIVE_FEEDFORWARD,
     Calibration.Drive.DRIVE_RATIO,
     Calibration.Drive.STEERING_RATIO,
@@ -57,8 +60,8 @@ public class Swerve extends Module {
     Ports.MODULE_1_ABS_ENCODER,
     false,
     false,
-    new MotorControllerPIDConfig(0.001, 0.0, 0.0),
-    new MotorControllerPIDConfig(0.6, 0.0, 12.0),
+    new MotorControllerPIDConfig(0.15, 0.0, 0.0),
+    turningPID,
     Calibration.Drive.DRIVE_FEEDFORWARD,
     Calibration.Drive.DRIVE_RATIO,
     Calibration.Drive.STEERING_RATIO,
@@ -77,8 +80,8 @@ public class Swerve extends Module {
     Ports.MODULE_2_ABS_ENCODER,
     false,
     false,
-    new MotorControllerPIDConfig(0.001, 0.0, 0.0),
-    new MotorControllerPIDConfig(0.6, 0.0, 12.0),
+    new MotorControllerPIDConfig(0.15, 0.0, 0.0),
+    turningPID,
     Calibration.Drive.DRIVE_FEEDFORWARD,
     Calibration.Drive.DRIVE_RATIO,
     Calibration.Drive.STEERING_RATIO,
@@ -97,8 +100,8 @@ public class Swerve extends Module {
     Ports.MODULE_3_ABS_ENCODER,
     false,
     false,
-    new MotorControllerPIDConfig(0.001, 0.0, 0.0),
-    new MotorControllerPIDConfig(0.6, 0.0, 12.0),
+    new MotorControllerPIDConfig(0.15, 0.0, 0.0),
+    turningPID,
     Calibration.Drive.DRIVE_FEEDFORWARD,
     Calibration.Drive.DRIVE_RATIO,
     Calibration.Drive.STEERING_RATIO,
@@ -235,7 +238,7 @@ public class Swerve extends Module {
       getModuleStates()
     );
 
-    quixsam.update(odometryMeasrument);
+    quixsam.update(odometryMeasrument, vision);
     quixsam.periodic();
   }
 
@@ -250,6 +253,10 @@ public class Swerve extends Module {
 
   public void setModuleStates(boolean openLoop, QuixSwerveModuleState... desiredStates) {
     QuixSwerveDriveKinematics.normalizeWheelSpeeds(desiredStates, Calibration.Drive.MAX_DRIVE_VELOCITY);
+
+    SmartDashboard.putNumber("DriveVel", frontLeft.getState().speedMetersPerSecond);
+    SmartDashboard.putNumber("DriveSetpoint", desiredStates[0].speedMetersPerSecond);
+
     
     for(QuixSwerveModule module : modules){
       module.setDesiredStateOpenLoop(desiredStates[module.getID()]);

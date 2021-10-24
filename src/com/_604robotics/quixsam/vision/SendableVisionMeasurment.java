@@ -25,6 +25,10 @@ public class SendableVisionMeasurment {
         return id;
     }
 
+    public void setId(int id) {
+        this.id = id;
+    }
+
     public void addMeasurment(Pair<Double, Double> measurment, Pair<Double, Double> sigma) {
         measurments.add(measurment);
         sigmas.add(sigma);

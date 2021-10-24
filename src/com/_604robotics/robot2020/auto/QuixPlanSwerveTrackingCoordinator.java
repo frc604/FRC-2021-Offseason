@@ -17,6 +17,8 @@ import edu.wpi.first.wpilibj.controller.RamseteController;
 import edu.wpi.first.wpilibj.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.geometry.Transform2d;
+import edu.wpi.first.wpilibj.geometry.Translation2d;
 import edu.wpi.first.wpilibj.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.kinematics.DifferentialDriveWheelSpeeds;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
@@ -33,6 +35,8 @@ public class QuixPlanSwerveTrackingCoordinator extends Coordinator {
   private final QuixHolonomicDriveController controller;
   private double totalTime;
   private Field2d field = new Field2d();
+
+  private double globalCurrentTime = 0.0;
 
   public QuixPlanSwerveTrackingCoordinator(
       QuikPlanSwerveReader reader, Swerve swerve, SwerveTrackerConstants constants) {
@@ -57,6 +61,7 @@ public class QuixPlanSwerveTrackingCoordinator extends Coordinator {
                 initialState.get(0), initialState.get(1), new Rotation2d(initialState.get(2))));
 
     totalTime = reader.getTotalTime();
+    globalCurrentTime = 0.0;
     timer.reset();
     timer.start();
   }
@@ -64,6 +69,7 @@ public class QuixPlanSwerveTrackingCoordinator extends Coordinator {
   @Override
   public boolean run() {
     double curTime = timer.get();
+    globalCurrentTime = curTime;
 
     if (timer.hasElapsed(totalTime)) {
       return false;
@@ -94,6 +100,10 @@ public class QuixPlanSwerveTrackingCoordinator extends Coordinator {
   @Override
   public void end() {
     stop();
+  }
+
+  public boolean doShoot() {
+    return reader.doShoot(globalCurrentTime);
   }
 
   public void useOutput(QuixSwerveModuleState[] moduleStates) {}

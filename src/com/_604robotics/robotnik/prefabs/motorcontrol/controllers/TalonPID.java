@@ -9,6 +9,9 @@ import com.ctre.phoenix.motorcontrol.TalonFXControlMode;
 import com.ctre.phoenix.motorcontrol.TalonFXFeedbackDevice;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.util.Units;
+
 public class TalonPID extends MotorControllerPID{
   public TalonFX controller;
   private FalconEncoder encoder;
@@ -36,16 +39,22 @@ public class TalonPID extends MotorControllerPID{
   @Override
   public void setSetpointVelocity(double setpoint) {
     this.controller.set(
-      ControlMode.Velocity,  (setpoint / encoder.getPositionConversionFactor()) * (1.0 / 100.0), DemandType.ArbitraryFeedForward, 0.0);
+      ControlMode.Velocity,  (setpoint / encoder.getPositionConversionFactor()) * (1.0 / 10.0), DemandType.ArbitraryFeedForward, 0.0);
+
+      SmartDashboard.putNumber("Conversion", Conversions.MPSToFalcon(setpoint, Math.PI * Units.inchesToMeters(4), 6.86));
+      SmartDashboard.putNumber("Code", (setpoint / encoder.getPositionConversionFactor()) * (1.0 / 10.0));
   }
 
   @Override
   public void setSetpointVelocity(double setpoint, double feedforwardVolts) {
     this.controller.set(
       ControlMode.Velocity,
-        (setpoint / encoder.getPositionConversionFactor()) * (1.0 / 100.0),
+        (setpoint / encoder.getPositionConversionFactor()) * (1.0 / 10.0),
         DemandType.ArbitraryFeedForward,
         feedforwardVolts / 12.0);
+
+    SmartDashboard.putNumber("Conversion", Conversions.MPSToFalcon(setpoint, Math.PI * Units.inchesToMeters(4), 6.86));
+    SmartDashboard.putNumber("Code", (setpoint / encoder.getPositionConversionFactor()) * (1.0 / 10.0));
   }
 
   @Override

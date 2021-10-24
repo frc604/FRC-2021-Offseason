@@ -47,7 +47,6 @@ public class QuixsamSwerveLocalizer {
     }
 
     public void update(SwerveDriveOdometryMeasurement odometry, VisionCamera.PipelineVisionPacket vision) {
-        currentID += 1;
         double currentTime = Timer.getFPGATimestamp();
 
         rawOdometry.updateWithTime(currentTime, odometry.getGyroAngle(), odometry.getModuleStates());
@@ -59,29 +58,29 @@ public class QuixsamSwerveLocalizer {
         double visionTime = currentTime - (vision.getLatency() / 1000);
         Pose2d interpolatedPose = poseMap.get(visionTime);
 
+        System.out.println("Interp Pose: " + interpolatedPose);
+        System.out.println("REAL Pose: " + rawOdometry.getPoseMeters());
+
         SendableOdometryMeasurment sendableOdometryMeasurment;
         SendableVisionMeasurment sendableVisionMeasurment = null;
 
         Target bestTarget = vision.getBestTarget();
         if (bestTarget.getCorners().size() == 4) {
-            sendableVisionMeasurment = new SendableVisionMeasurment(currentID);
+            sendableVisionMeasurment = new SendableVisionMeasurment(0);
 
             for (Pair<Double, Double> corner : bestTarget.getCorners()) {
                 sendableVisionMeasurment.addMeasurment(new Pair<>(corner.getFirst(), corner.getSecond()), new Pair<>(0.1, 0.1));
             }
 
-            sendableOdometryMeasurment = new SendableOdometryMeasurment(currentID, interpolatedPose, new Pose2d(0.1, 0.1, Rotation2d.fromDegrees(0.1)));
+            sendableOdometryMeasurment = new SendableOdometryMeasurment(0, rawOdometry.getPoseMeters(), new Pose2d(0.1, 0.1, Rotation2d.fromDegrees(0.1)));
+            buffer.put(visionTime, new Pair<>(sendableOdometryMeasurment, sendableVisionMeasurment));
         } else {
-            sendableOdometryMeasurment = new SendableOdometryMeasurment(currentID, rawOdometry.getPoseMeters(), new Pose2d(0.1, 0.1, Rotation2d.fromDegrees(0.1)));
+            sendableOdometryMeasurment = new SendableOdometryMeasurment(0, rawOdometry.getPoseMeters(), new Pose2d(0.1, 0.1, Rotation2d.fromDegrees(0.1)));
+            buffer.put(currentTime, new Pair<>(sendableOdometryMeasurment, sendableVisionMeasurment));
         }
-
-
-        idMap.put(currentID, visionTime);
-        buffer.put(currentTime, new Pair<>(sendableOdometryMeasurment, sendableVisionMeasurment));
     }
 
     public void update(SwerveDriveOdometryMeasurement odometry) {
-        currentID += 1;
         double currentTime = Timer.getFPGATimestamp();
 
         rawOdometry.updateWithTime(currentTime, odometry.getGyroAngle(), odometry.getModuleStates());
@@ -90,8 +89,7 @@ public class QuixsamSwerveLocalizer {
 
         poseMap.set(currentTime, Interpolatable.interPose2d(rawOdometry.getPoseMeters()));
 
-        idMap.put(currentID, currentTime);
-        buffer.put(currentTime, new Pair<>(new SendableOdometryMeasurment(currentID, rawOdometry.getPoseMeters(), new Pose2d(0.1, 0.1, Rotation2d.fromDegrees(0.1))), null));
+        buffer.put(currentTime, new Pair<>(new SendableOdometryMeasurment(0, rawOdometry.getPoseMeters(), new Pose2d(0.1, 0.1, Rotation2d.fromDegrees(0.1))), null));
     }
 
     public void computeEstimate(QuixsamEsimate estimate) {
@@ -122,10 +120,17 @@ public class QuixsamSwerveLocalizer {
         ArrayList<Double> keys = new ArrayList<>(buffer.keySet());
         for (double key : keys) {
             if (currentTime - key > timeTreshold) {
+                currentID += 1;
+                idMap.put(currentID, key);
+
+                buffer.get(key).getFirst().setId(currentID);
                 networkTable.publishOdometry(buffer.get(key).getFirst());
+
                 if (buffer.get(key).getSecond() != null) {
+                    buffer.get(key).getSecond().setId(currentID);
                     networkTable.publishVision(buffer.get(key).getSecond());
                 }
+
                 buffer.remove(key);
             }
         }

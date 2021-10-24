@@ -19,14 +19,14 @@ public class FalconDashboard {
   }
 
   public void publishRobotPose(Pose2d pose) {
-    table.getEntry("robotX").setDouble(pose.getTranslation().getX() * 3.281);
-    table.getEntry("robotY").setDouble(pose.getTranslation().getY() * 3.281);
+    table.getEntry("robotX").setDouble(pose.getTranslation().getX() * 3.281 + 27);
+    table.getEntry("robotY").setDouble(pose.getTranslation().getY() * 3.281 + 13.5);
     table.getEntry("robotHeading").setDouble(pose.getRotation().getRadians());
   }
 
   public void publishPathPose(Pose2d pose) {
-    table.getEntry("pathX").setDouble(pose.getTranslation().getX() * 3.281);
-    table.getEntry("pathY").setDouble(pose.getTranslation().getY() * 3.281);
+    table.getEntry("pathX").setDouble(pose.getTranslation().getX() * 3.281 + 27);
+    table.getEntry("pathY").setDouble(pose.getTranslation().getY() * 3.281 + 13.5);
     table.getEntry("pathHeading").setDouble(pose.getRotation().getRadians());
     table.getEntry("isFollowingPath").setBoolean(true);
   }

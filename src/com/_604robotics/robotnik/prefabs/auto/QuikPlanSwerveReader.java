@@ -19,6 +19,7 @@ import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 public class QuikPlanSwerveReader {
   List<Double> timeData = new ArrayList<>();
   List<List<Double>> data = new ArrayList<>();
+  List<Boolean> shootData = new ArrayList<>();
   Output<File> chooser;
 
   public QuikPlanSwerveReader(Module module) {
@@ -90,6 +91,11 @@ public class QuikPlanSwerveReader {
     return state;
   }
 
+  public boolean doShoot(double time) {
+    // System.out.println(getState(time).get(TrajectoryState.shoot.index));
+    return getState(time).get(TrajectoryState.shoot.index) == 1.0;
+  }
+
   public double getTotalTime() {
     return timeData.get(timeData.size() - 1);
   }
@@ -100,7 +106,8 @@ public class QuikPlanSwerveReader {
     Theta(2),
     dx(3),
     dy(4),
-    dTheta(5);
+    dTheta(5),
+    shoot(6);
 
     public final int index;
 

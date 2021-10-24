@@ -39,7 +39,7 @@ public class Calibration {
 
   /* Anti Jam Roller Calibration */
   public static final class AntiJamRoller {
-    public static final double ANTI_JAM_SPEED = -0.25;
+    public static final double ANTI_JAM_SPEED = -1.0;
     public static final double REVERSE_SPEED = 0.5;
   }
 
@@ -85,12 +85,12 @@ public class Calibration {
     public static final boolean GYRO_REVERSED = true;
     public static final double TRACK_WIDTH = Units.inchesToMeters(20.5);
     public static final double WHEEL_BASE = Units.inchesToMeters(25.5);
-    public static final double WHEEL_DIAMETER = Units.inchesToMeters(4);
+    public static final double WHEEL_DIAMETER = Units.inchesToMeters(3.9);
 
     public static final GearRatio DRIVE_RATIO = new GearRatio(1, -6.86);
     public static final GearRatio STEERING_RATIO = new GearRatio(1, 12.8);
 
-    public static final SimpleMotorFeedforward DRIVE_FEEDFORWARD = new SimpleMotorFeedforward(0.15, 2.44, 0.27);
+    public static final SimpleMotorFeedforward DRIVE_FEEDFORWARD = new SimpleMotorFeedforward(0.2, 2.37, 0.12);
 
     public static final double MAX_DRIVE_VELOCITY = 4.5;
     public static final double MAX_ANGULAR_VELOCITY = 11.5;
@@ -125,9 +125,9 @@ public class Calibration {
 
     public static final SwerveTrackerConstants TRACKER_CONSTANTS =
         new SwerveTrackerConstants(
-            new PIDController(1.0, 0.0, 0.0),
-            new PIDController(1.0, 0.0, 0.0),
-            new PIDController(1.0, 0.0, 0.0),
+            new PIDController(6.0, 0.0, 0.1),
+            new PIDController(6.0, 0.0, 0.1),
+            new PIDController(5.0, 0.0, 0.0),
             MAX_SPEED_METERS_PER_SECOND,
             MAX_ACCELERATION_METERS_PER_SECOND_SQUARED);
 

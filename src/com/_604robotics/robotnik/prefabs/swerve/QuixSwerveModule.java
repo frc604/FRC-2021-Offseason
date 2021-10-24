@@ -119,7 +119,7 @@ public abstract class QuixSwerveModule {
     public void setDesiredStateClosedLoop(QuixSwerveModuleState desiredState){
         desiredState = QuixSwerveModuleState.optimize(desiredState, getState().angle);
 
-        drivePID.setSetpointVelocity(desiredState.speedMetersPerSecond, driveFeedforward.calculate(desiredState.speedMetersPerSecond));
+        drivePID.setSetpointVelocity(-desiredState.speedMetersPerSecond, driveFeedforward.calculate(desiredState.speedMetersPerSecond));
 
         double angle = (Math.abs(desiredState.speedMetersPerSecond) <= (maxDriveVelocity * 0.01)) ? lastAngle : desiredState.angle.getDegrees(); //Prevent rotating module if speed is less then 1%. Prevents Jittering.
         steeringPID.setSetpointPosition(angle);
