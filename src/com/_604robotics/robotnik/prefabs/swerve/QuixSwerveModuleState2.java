@@ -8,7 +8,7 @@ import edu.wpi.first.wpilibj.geometry.Rotation2d;
 
 /** Represents the state of one swerve module. */
 @SuppressWarnings("MemberName")
-public class QuixSwerveModuleState implements Comparable<QuixSwerveModuleState> {
+public class QuixSwerveModuleState2 implements Comparable<QuixSwerveModuleState2> {
   /** Speed of the wheel of the module. */
   public double speedMetersPerSecond;
 
@@ -16,7 +16,7 @@ public class QuixSwerveModuleState implements Comparable<QuixSwerveModuleState> 
   public Rotation2d angle = Rotation2d.fromDegrees(0);
 
   /** Constructs a SwerveModuleState with zeros for speed and angle. */
-  public QuixSwerveModuleState() {}
+  public QuixSwerveModuleState2() {}
 
   /**
    * Constructs a SwerveModuleState.
@@ -24,7 +24,7 @@ public class QuixSwerveModuleState implements Comparable<QuixSwerveModuleState> 
    * @param speedMetersPerSecond The speed of the wheel of the module.
    * @param angle The angle of the module.
    */
-  public QuixSwerveModuleState(double speedMetersPerSecond, Rotation2d angle) {
+  public QuixSwerveModuleState2(double speedMetersPerSecond, Rotation2d angle) {
     this.speedMetersPerSecond = speedMetersPerSecond;
     this.angle = angle;
   }
@@ -38,7 +38,7 @@ public class QuixSwerveModuleState implements Comparable<QuixSwerveModuleState> 
    */
   @Override
   @SuppressWarnings("ParameterName")
-  public int compareTo(QuixSwerveModuleState o) {
+  public int compareTo(QuixSwerveModuleState2 o) {
     return Double.compare(this.speedMetersPerSecond, o.speedMetersPerSecond);
   }
 
@@ -50,39 +50,49 @@ public class QuixSwerveModuleState implements Comparable<QuixSwerveModuleState> 
 
   /**
    * Minimize the change in heading the desired swerve module state would require by potentially
-   * reversing the direction the wheel spins. If this is used with the PIDController class's
-   * continuous input functionality, the furthest a wheel will ever rotate is 90 degrees.
+   * reversing the direction the wheel spins.
    *
    * @param desiredState The desired state.
    * @param currentAngle The current module angle.
-   * @return Optimized swerve module state.
    */
-  public static QuixSwerveModuleState optimize(QuixSwerveModuleState desiredState, Rotation2d currentAngle) {
-    double targetAngle = placeInScope(currentAngle.getDegrees(), desiredState.angle.getDegrees());
+  public static QuixSwerveModuleState2 optimize(QuixSwerveModuleState2 desiredState, Rotation2d currentAngle) {
+    double targetAngle = placeInAppropriate0To360Scope(currentAngle.getDegrees(), desiredState.angle.getDegrees());
     double targetSpeed = desiredState.speedMetersPerSecond;
     double delta = targetAngle - currentAngle.getDegrees();
     if (Math.abs(delta) > 90){
         targetSpeed = -targetSpeed;
         targetAngle = delta > 90 ? (targetAngle -= 180) : (targetAngle += 180);
     }        
-    return new QuixSwerveModuleState(targetSpeed, Rotation2d.fromDegrees(targetAngle));
+    return new QuixSwerveModuleState2(targetSpeed, Rotation2d.fromDegrees(targetAngle));
   }
 
-  private static double placeInScope(double currentAngle, double desiredAngle) {
-    // Place the desired angle in the scope [360(n-1), 360(n)] of the current angle.
-    double angle = Math.floor(currentAngle / 360.0) * 360.0 + mod(desiredAngle, 360);
-
-    // Constraint the desired angle to be < 180 degrees from the current angle.
-    if ((angle - currentAngle) > 180) {
-        angle -= 360;
-    } else if ((angle - currentAngle) < -180) {
-        angle += 360;
+  /**
+   * @param scopeReference Current Angle
+   * @param newAngle Target Angle
+   * @return Closest angle within scope
+   */
+  public static double placeInAppropriate0To360Scope(double scopeReference, double newAngle) {
+    double lowerBound;
+    double upperBound;
+    double lowerOffset = scopeReference % 360;
+    if (lowerOffset >= 0) {
+        lowerBound = scopeReference - lowerOffset;
+        upperBound = scopeReference + (360 - lowerOffset);
+    } else {
+        upperBound = scopeReference - lowerOffset;
+        lowerBound = scopeReference - (360 + lowerOffset);
     }
-
-    return angle;
-  }
-
-  private static double mod(double a, double n) {
-    return (a % n + n) % n;
+    while (newAngle < lowerBound) {
+        newAngle += 360;
+    }
+    while (newAngle > upperBound) {
+        newAngle -= 360;
+    }
+    if (newAngle - scopeReference > 180) {
+        newAngle -= 360;
+    } else if (newAngle - scopeReference < -180) {
+        newAngle += 360;
+    }
+    return newAngle;
   }
 }
