@@ -81,9 +81,9 @@ public abstract class QuixSwerveModule {
         this.driveEncoder.setdistancePerRotation(this.driveRatio.calculate(Math.PI * wheelDiameter));
         this.steeringEncoder.setdistancePerRotation(this.steeringRatio.calculate(360.0));
 
-        lastAngle = getState().angle.getDegrees();
-
         zeroToAbsPosition();
+
+        lastAngle = getState().angle.getDegrees();
     }
 
     // public void setDesiredStateClosedLoop(QuixSwerveModuleState desiredState) {

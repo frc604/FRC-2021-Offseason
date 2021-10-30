@@ -70,6 +70,10 @@ public class AutonomousMode extends Coordinator {
   public void begin() {
     System.out.println(autonMode.get());
 
+    reader.loadChosenFile();
+
+    robot.drive.zeroGyroOffset();
+
     switch (autonMode.get()) {
       case MANUAL:
         selectedModeMacro = robot.teleopMode;

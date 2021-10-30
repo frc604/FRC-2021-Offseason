@@ -3,6 +3,7 @@ package com._604robotics.robotnik.prefabs.devices;
 
 import com.ctre.phoenix.sensors.AbsoluteSensorRange;
 import com.ctre.phoenix.sensors.CANCoder;
+import com.ctre.phoenix.sensors.CANCoderStatusFrame;
 import com.ctre.phoenix.sensors.SensorInitializationStrategy;
 
 public class QuixCANCoder implements BetterAbsoluteEncoder {
@@ -18,6 +19,9 @@ public class QuixCANCoder implements BetterAbsoluteEncoder {
         this.encoder.configFactoryDefault();
         this.encoder.configAbsoluteSensorRange(AbsoluteSensorRange.Unsigned_0_to_360);
         this.encoder.configSensorInitializationStrategy(SensorInitializationStrategy.BootToAbsolutePosition);
+
+        this.encoder.setStatusFramePeriod(CANCoderStatusFrame.SensorData, 50);
+        this.encoder.setStatusFramePeriod(CANCoderStatusFrame.VbatAndFaults, 100);
     }
 
     @Override

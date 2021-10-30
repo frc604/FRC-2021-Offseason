@@ -156,25 +156,25 @@ public class Swerve extends Module {
 
   public final Output<Double> gyroAngle = addOutput("gyroAngle", imu::getAngle);
 
-  // public final Output<Double> frontLeftAngle = addOutput("Front Left Angle", frontLeft::getAngle);
-  // public final Output<Double> frontRightAngle = addOutput("Front Right Angle", frontRight::getAngle);
-  // public final Output<Double> rearLeftAngle = addOutput("Rear Left Angle", rearLeft::getAngle);
-  // public final Output<Double> rearRightAngle = addOutput("Rear Right Angle", rearRight::getAngle);
+  public final Output<Double> frontLeftAngle = addOutput("Front Left Angle", frontLeft::getAngle);
+  public final Output<Double> frontRightAngle = addOutput("Front Right Angle", frontRight::getAngle);
+  public final Output<Double> rearLeftAngle = addOutput("Rear Left Angle", rearLeft::getAngle);
+  public final Output<Double> rearRightAngle = addOutput("Rear Right Angle", rearRight::getAngle);
 
-  // public final Output<Double> absfrontLeftAngle = addOutput("Abs Front Left Angle", frontLeft::getAbsEncoderAngle);
-  // public final Output<Double> absfrontRightAngle = addOutput("Abs Front Right Angle", frontRight::getAbsEncoderAngle);
-  // public final Output<Double> absrearLeftAngle = addOutput("Abs Rear Left Angle", rearLeft::getAbsEncoderAngle);
-  // public final Output<Double> absrearRightAngle = addOutput("Abs Rear Right Angle", rearRight::getAbsEncoderAngle);
+  public final Output<Double> absfrontLeftAngle = addOutput("Abs Front Left Angle", frontLeft::getAbsEncoderAngle);
+  public final Output<Double> absfrontRightAngle = addOutput("Abs Front Right Angle", frontRight::getAbsEncoderAngle);
+  public final Output<Double> absrearLeftAngle = addOutput("Abs Rear Left Angle", rearLeft::getAbsEncoderAngle);
+  public final Output<Double> absrearRightAngle = addOutput("Abs Rear Right Angle", rearRight::getAbsEncoderAngle);
 
   public final Output<Double> robotHeading = addOutput("Robot Heading", this::getHeadingDegrees);
   public final Output<Double> robotX = addOutput("Robot X Position", this::getX);
   public final Output<Double> robotY = addOutput("Robot Y Position", this::getY);
   
-  
+  private double gyroOffset = 0.0;
   
   /* Auton Methods */
   public Rotation2d getHeading() {
-    return (Calibration.Drive.GYRO_REVERSED) ? Rotation2d.fromDegrees(360 - imu.getAngle()) : Rotation2d.fromDegrees(imu.getAngle());
+    return (Calibration.Drive.GYRO_REVERSED) ? Rotation2d.fromDegrees(360 - (imu.getAngle() - gyroOffset)) : Rotation2d.fromDegrees((imu.getAngle() - gyroOffset));
     // var angle = -imu.getAngle() * (Calibration.Drive.GYRO_REVERSED ? -1.0 : 1.0);
     // return Rotation2d.fromDegrees(Math.IEEEremainder(angle, 360));
   }
@@ -231,6 +231,10 @@ public class Swerve extends Module {
   public void zeroGyro() {
     imu.calibrate();
     imu.reset();
+  }
+
+  public void zeroGyroOffset() {
+    gyroOffset = imu.getAngle();
   }
 
   public void setModuleStates(boolean openLoop, QuixSwerveModuleState... desiredStates) {

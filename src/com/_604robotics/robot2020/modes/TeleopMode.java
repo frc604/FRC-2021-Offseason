@@ -53,6 +53,8 @@ public class TeleopMode extends Coordinator {
   private boolean autoCentering = false;
   private boolean aligned = false;
 
+  private boolean climbMode = false;
+
   private final Logger test = new Logger("Teleop");
 
   public TeleopMode(com._604robotics.robot2020.Robot2020 robot) {
@@ -272,15 +274,33 @@ public class TeleopMode extends Coordinator {
       }
 
       if (driverStart) {
-        robot.drive.zeroGyro();
+        climbMode = true;
+
+        if (driverBack) {
+          robot.climber.extend.activate();
+        } else if (driverRightBumper) {
+          robot.climber.climb.activate();
+        } else if (driverLeftBumper) {
+          robot.climber.retract.activate();
+        } else {
+          robot.climber.idle.activate();
+        }
+        
+      } else {
+        climbMode = false;
+        robot.climber.idle.activate();
       }
 
-      if (driverY || driverA || driverB || driverX) {
+      if (driverY || driverA || driverB) {
         currentDrive = CurrentDrive.SNAPPING;
       }
 
       if (Math.abs(rightX) > 0.1) {
         currentDrive = CurrentDrive.OPENLOOP;
+      }
+
+      if (driverX) {
+        robot.drive.zeroGyroOffset();
       }
 
       // // Get Dashboard option for drive
@@ -337,8 +357,6 @@ public class TeleopMode extends Coordinator {
             snapTo(CardinalDirections.SOUTH);
           } else if (driverB) {
             snapTo(CardinalDirections.EAST);
-          } else if (driverX) {
-            snapTo(CardinalDirections.WEST);
           }
 
           autoAngle.activate();
@@ -422,7 +440,7 @@ public class TeleopMode extends Coordinator {
         revolve.activate();
         roller.activate();
         antiJam.activate();
-      } else if (driverLeftBumper) {
+      } else if (driverLeftBumper && !climbMode) {
         reverseIntake.activate();
         reverseRevolver.activate();
         reverseRoller.activate();
@@ -481,7 +499,7 @@ public class TeleopMode extends Coordinator {
         stop.activate();
       }
 
-      if (driverRightBumper) {
+      if (driverRightBumper && !climbMode) {
         emptyTower.activate();
         emptyRevolver.activate();
         roller.activate();

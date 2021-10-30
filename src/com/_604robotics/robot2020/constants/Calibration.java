@@ -18,8 +18,7 @@ public class Calibration {
 
   /* Climber Calibration */
   public static final class Climber {
-    public static final double CLIMB_SPEED = -0.25;
-    public static final double RETRACT_SPEED = 0.25;
+    public static final double CLIMB_SPEED = 0.5;
   }
 
   /* Tower Calibration */
@@ -32,7 +31,7 @@ public class Calibration {
   /* Revolver Calibration */
   public static final class Revolver {
     // public static final double EMPTY_SPEED = 0.75;
-    public static final double EMPTY_SPEED = 0.4;
+    public static final double EMPTY_SPEED = 0.6;
     public static final double INTAKE_SPEED = 0.5;
     public static final double REVERSE_SPEED = -0.5;
   }

@@ -37,6 +37,8 @@ public class Robot2020 extends Robot {
 
   public final Shooter shooter = addModule(new Shooter());
 
+  public final Climber climber = addModule(new Climber());
+
   public final Swerve drive = addModule(new Swerve());
 
   public final Limelight limelight = addModule(new Limelight(

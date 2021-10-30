@@ -19,7 +19,7 @@ public class Ports {
   public static final int MODULE_3_ABS_ENCODER = 3;
 
   /* Climber */
-  public static final int CLIMBER_MOTOR = 4;
+  public static final int CLIMBER_MOTOR = 16;
 
   /* Shifter */
   public static final int SHIFTER_A = 4;
