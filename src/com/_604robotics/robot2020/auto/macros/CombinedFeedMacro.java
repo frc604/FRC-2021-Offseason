@@ -10,6 +10,7 @@ public class CombinedFeedMacro extends ParallelCoordinator {
     super(CombinedFeedMacro.class);
 
     addCoordinators(
+        new AutoAimMacro(robot.drive, robot.limelight),
         new FeedMacro(robot.revolver, robot.tower, robot.antiJamRoller),
         new ShooterControlMacro(robot.shooter)
     );

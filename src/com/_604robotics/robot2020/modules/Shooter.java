@@ -68,10 +68,10 @@ public class Shooter extends Module {
     leftEncoder = new FalconEncoder(leftMotor, pulley);
     leftEncoder.setInverted(true);
 
-    feederEncoder = new FalconEncoder(feederMotor, pulley);
+    feederEncoder = new FalconEncoder(feederMotor, new GearRatio(1, 1));
 
-    leftEncoder.setdistancePerRotation(2 * Math.PI);
-    feederEncoder.setdistancePerRotation(2 * Math.PI);
+    leftEncoder.setdistancePerRotation(-2 * Math.PI);
+    feederEncoder.setdistancePerRotation(-2 * Math.PI);
 
     leftEncoder.zero();
 
@@ -156,8 +156,8 @@ public class Shooter extends Module {
 
     @Override
     public void run() {
-      shooterPID.setSetpointVelocity(setpoint.get(), shooterFeedforward.calculate(setpoint.get()));
-      feederPID.setSetpointVelocity(setpoint.get(), feederFeedforward.calculate(setpoint.get()));
+      shooterPID.setSetpointVelocity(-(setpoint.get()+50), shooterFeedforward.calculate(setpoint.get()));
+      feederPID.setSetpointVelocity(-setpoint.get(), feederFeedforward.calculate(setpoint.get()));
     }
 
     @Override

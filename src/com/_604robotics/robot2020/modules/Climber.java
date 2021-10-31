@@ -69,7 +69,7 @@ public class Climber extends Module {
 
     @Override
     public void run() {
-      climbMotor.set(-0.25);
+      climbMotor.set(-0.75);
     }
   }
 

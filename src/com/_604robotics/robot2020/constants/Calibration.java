@@ -56,7 +56,7 @@ public class Calibration {
     public static final int DRIVEN_TEETH = 18;
 
     /* Velocity PD Controller */
-    public static final double kP = 0;
+    public static final double kP = 0.4;
     public static final double kD = 0; // Multiplying by 0.02 to time parameterize it.
 
     /* Feedforward */
@@ -70,12 +70,12 @@ public class Calibration {
   @Unreal("Get values from characterization.")
   public static final class Feeder {
     /* Velocity PD Controller */
-    public static final double kP = 0;
+    public static final double kP = 0.5;
     public static final double kD = 0; // Multiplying by 0.02 to time parameterize it.
 
     /* Feedforward */
     public static final double Ks = 0.132;
-    public static final double Kv = 0.0201;
+    public static final double Kv = 0.0178;
 
     public static final SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(Ks, Kv);
   }

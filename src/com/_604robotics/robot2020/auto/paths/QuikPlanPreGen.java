@@ -2,6 +2,7 @@ package com._604robotics.robot2020.auto.paths;
 
 import com._604robotics.robot2020.Robot2020;
 import com._604robotics.robot2020.auto.QuixPlanSwerveTrajectoryTracker;
+import com._604robotics.robot2020.auto.macros.AutoAimMacro;
 import com._604robotics.robot2020.auto.macros.CombinedFeedMacro;
 import com._604robotics.robot2020.auto.macros.FeedMacro;
 import com._604robotics.robot2020.auto.macros.FeedOTFMacro;
@@ -30,6 +31,7 @@ public class QuikPlanPreGen extends StatefulCoordinator {
           new FeedOTFMacro(robot.intake, robot.intakeDeploy, robot.revolver, robot.tower, robot.antiJamRoller, () -> tracker.doShoot())
       )
     );
+    addState("AUTOAIM", new AutoAimMacro(robot.drive, robot.limelight).withTimeout(0.5));
     addState("FINISH", new CombinedFeedMacro(robot).withTimeout(5));
  }
 }
