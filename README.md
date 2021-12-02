@@ -32,7 +32,7 @@ https://github.com/wpilibsuite/allwpilib/releases
   
   c. Install for All Users
   
-  d. Click Slect/Download VSCode
+  d. Click Select/Download VSCode
   
   e. Click Download and wait for it to finish
   
